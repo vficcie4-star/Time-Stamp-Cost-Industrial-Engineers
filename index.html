@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1a1a2e">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <title>Clock Stopwatch</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header with Time and Date -->
+        <header class="header">
+            <div class="time-date">
+                <div class="current-time" id="currentTime">00:00:00</div>
+                <div class="current-date" id="currentDate">01-JAN-2026</div>
+            </div>
+        </header>
+
+        <!-- Control Buttons -->
+        <div class="controls">
+            <button class="btn btn-clear" id="clearHistory">Clear History</button>
+            <button class="btn btn-add" id="addTime">Add Time</button>
+        </div>
+
+        <!-- Table Headers -->
+        <div class="table-header">
+            <div class="col col-no">No.</div>
+            <div class="col col-start">Start Time</div>
+            <div class="col col-end">End Time</div>
+            <div class="col col-paused">Paused Time</div>
+        </div>
+
+        <!-- Table Body -->
+        <div class="table-body" id="tableBody">
+            <!-- Entries will be added here dynamically -->
+        </div>
+
+        <!-- Export Button -->
+        <div class="export-container">
+            <button class="btn btn-export" id="exportCSV">📥 Export CSV</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
