@@ -3,44 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#1a1a2e">
+    <title>Journal & Stop Watch</title>
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon-192.png">
-    <title>Clock Stopwatch</title>
+    <meta name="theme-color" content="#2196F3">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="app-container">
         <!-- Header with Time and Date -->
-        <header class="header">
-            <div class="time-date">
-                <div class="current-time" id="currentTime">00:00:00</div>
-                <div class="current-date" id="currentDate">01-JAN-2026</div>
+        <div class="header">
+            <div class="time-date-container">
+                <div id="currentTime" class="current-time">00:00:00</div>
+                <div id="currentDate" class="current-date">01-JAN-2026</div>
             </div>
-        </header>
-
-        <!-- Control Buttons -->
-        <div class="controls">
-            <button class="btn btn-clear" id="clearHistory">Clear History</button>
-            <button class="btn btn-add" id="addTime">Add Time</button>
         </div>
 
-        <!-- Table Headers -->
-        <div class="table-header">
-            <div class="col col-no">No.</div>
-            <div class="col col-start">Start Time</div>
-            <div class="col col-end">End Time</div>
-            <div class="col col-paused">Paused Time</div>
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button id="clearHistoryBtn" class="btn btn-danger">Clear History</button>
+            <button id="exportCSVBtn" class="btn btn-success">Export CSV</button>
         </div>
 
-        <!-- Table Body -->
-        <div class="table-body" id="tableBody">
-            <!-- Entries will be added here dynamically -->
+        <!-- Table Container -->
+        <div class="table-container">
+            <table id="journalTable">
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>Product</th>
+                        <th>Process</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Paused Time</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Rows will be added here -->
+                </tbody>
+                <tfoot id="tableFooter">
+                    <tr>
+                        <td colspan="7" style="padding: 10px;">
+                            <button id="addRowBtn" class="btn btn-primary add-bottom-btn">+ Add Time</button>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
         </div>
+    </div>
 
-        <!-- Export Button -->
-        <div class="export-container">
-            <button class="btn btn-export" id="exportCSV">📥 Export CSV</button>
+    <!-- Modal for detailed form -->
+    <div id="formModal" class="modal">
+        <div class="modal-content form-modal">
+            <div class="modal-header">
+                <h3 id="formModalTitle">Entry Details</h3>
+                <div class="modal-actions">
+                    <button id="formCancelBtn" class="btn btn-danger btn-sm">Cancel</button>
+                    <button id="formSaveBtn" class="btn btn-primary btn-sm">Save</button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <form id="entryForm" class="entry-form">
+                    <div class="form-group">
+                        <label for="formSection">Section</label>
+                        <input type="text" id="formSection" placeholder="Enter Section">
+                    </div>
+                    <div class="form-group">
+                        <label for="formProduct">Product</label>
+                        <input type="text" id="formProduct" placeholder="Enter Product">
+                    </div>
+                    <div class="form-group">
+                        <label for="formSKU">SKU</label>
+                        <input type="text" id="formSKU" placeholder="Enter SKU">
+                    </div>
+                    <div class="form-group">
+                        <label for="formProcess">Process</label>
+                        <textarea id="formProcess" rows="3" placeholder="Enter Process Details"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="formWorkUnit">Work Unit</label>
+                        <input type="text" id="formWorkUnit" placeholder="Enter Work Unit">
+                    </div>
+                    <div class="form-group">
+                        <label for="formOprt">Oprt</label>
+                        <input type="text" id="formOprt" placeholder="Enter Oprt">
+                    </div>
+                    <div class="form-group">
+                        <label for="formMTE">MTE</label>
+                        <input type="text" id="formMTE" placeholder="Enter MTE">
+                    </div>
+                    <div class="form-group">
+                        <label for="formRemarks">Remarks</label>
+                        <textarea id="formRemarks" rows="3" placeholder="Enter Remarks"></textarea>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
