@@ -6,34 +6,30 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-    background: #0a0a1a;
-    color: #ffffff;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    padding: 10px;
+    background: #f5f5f5;
+    color: #333;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .app-container {
-    max-width: 480px;
-    width: 100%;
-    background: #1a1a2e;
-    border-radius: 20px;
-    padding: 15px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
-    min-height: 90vh;
+    max-width: 100vw;
+    padding: 10px;
+    margin: 0 auto;
+    padding-bottom: 80px;
 }
 
-/* Header */
+/* Header Styles */
 .header {
-    text-align: center;
-    padding: 10px 0 15px 0;
-    border-bottom: 2px solid #16213e;
+    background: linear-gradient(135deg, #2196F3, #1976D2);
+    color: white;
+    padding: 15px;
+    border-radius: 12px;
     margin-bottom: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
-.time-date {
+.time-date-container {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -41,384 +37,618 @@ body {
 }
 
 .current-time {
-    font-size: 3.5rem;
+    font-size: 2.5rem;
     font-weight: 700;
-    color: #00d4ff;
-    text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
-    letter-spacing: 3px;
-    font-variant-numeric: tabular-nums;
+    letter-spacing: 2px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .current-date {
-    font-size: 1.2rem;
-    color: #a8b2d1;
+    font-size: 1rem;
     font-weight: 500;
-    letter-spacing: 1px;
+    opacity: 0.9;
 }
 
-/* Controls */
-.controls {
+/* Action Buttons */
+.action-buttons {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     margin-bottom: 15px;
+    flex-wrap: wrap;
 }
 
 .btn {
     flex: 1;
-    padding: 12px;
+    min-width: 80px;
+    padding: 12px 8px;
     border: none;
-    border-radius: 12px;
-    font-size: 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    color: white;
 }
 
 .btn:active {
-    transform: scale(0.96);
+    transform: scale(0.95);
 }
 
-.btn-clear {
-    background: #ff6b6b;
+.btn-primary {
+    background: #2196F3;
+}
+
+.btn-danger {
+    background: #f44336;
+}
+
+.btn-success {
+    background: #4CAF50;
+}
+
+.btn-sm {
+    padding: 8px 16px;
+    font-size: 0.8rem;
+    min-width: auto;
+    flex: none;
+}
+
+/* Table Styles */
+.table-container {
+    background: white;
+    border-radius: 12px;
+    overflow-x: auto;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    -webkit-overflow-scrolling: touch;
+}
+
+#journalTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.75rem;
+    min-width: 600px;
+}
+
+#journalTable thead {
+    background: #1976D2;
     color: white;
 }
 
-.btn-clear:hover {
-    background: #ff5252;
-}
-
-.btn-add {
-    background: #00d4ff;
-    color: #0a0a1a;
-}
-
-.btn-add:hover {
-    background: #00b8d4;
-}
-
-/* Table Header */
-.table-header {
-    display: grid;
-    grid-template-columns: 45px 1fr 1fr 1fr;
-    gap: 8px;
+#journalTable th {
     padding: 10px 8px;
-    background: #16213e;
-    border-radius: 12px;
-    font-weight: 700;
-    font-size: 0.75rem;
-    color: #a8b2d1;
-    margin-bottom: 8px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.col {
-    text-align: center;
-    word-break: break-word;
-}
-
-.col-no {
-    text-align: center;
-}
-
-.col-start {
-    text-align: center;
-}
-
-.col-end {
-    text-align: center;
-}
-
-.col-paused {
-    text-align: center;
-}
-
-/* Table Body */
-.table-body {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    max-height: 55vh;
-    overflow-y: auto;
-    padding-right: 4px;
-}
-
-.table-body::-webkit-scrollbar {
-    width: 4px;
-}
-
-.table-body::-webkit-scrollbar-track {
-    background: #16213e;
-    border-radius: 10px;
-}
-
-.table-body::-webkit-scrollbar-thumb {
-    background: #00d4ff;
-    border-radius: 10px;
-}
-
-/* Entry Row */
-.entry-row {
-    display: grid;
-    grid-template-columns: 45px 1fr 1fr 1fr;
-    gap: 8px;
-    padding: 10px 8px;
-    background: #16213e;
-    border-radius: 12px;
-    align-items: center;
-    animation: slideIn 0.3s ease;
-    position: relative;
-}
-
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.entry-row .col {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-}
-
-/* Column values */
-.entry-row .col-no {
-    font-size: 0.9rem;
+    text-align: left;
     font-weight: 600;
-    color: #a8b2d1;
-}
-
-.entry-row .col-start {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #00d4ff;
-    font-variant-numeric: tabular-nums;
-}
-
-.entry-row .col-end {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    align-items: center;
-}
-
-.entry-row .col-end .time-display {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #ffd93d;
-    font-variant-numeric: tabular-nums;
-    min-height: 1.5rem;
-}
-
-.entry-row .col-paused {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #ff6b6b;
-    font-variant-numeric: tabular-nums;
-    min-height: 1.5rem;
-}
-
-/* Buttons in row */
-.row-btn {
-    padding: 4px 10px;
-    border: none;
-    border-radius: 8px;
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 10;
     font-size: 0.7rem;
+}
+
+#journalTable td {
+    padding: 8px 6px;
+    border-bottom: 1px solid #e0e0e0;
+    vertical-align: middle;
+}
+
+#journalTable tbody tr:hover {
+    background: #f5f5f5;
+}
+
+/* Product and Process cells */
+.product-cell {
+    font-weight: 500;
+    color: #1976D2;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 4px;
+    transition: background 0.2s;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.product-cell:hover {
+    background: #e3f2fd;
+}
+
+.product-cell:active {
+    background: #bbdefb;
+}
+
+.process-cell {
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 4px;
+    transition: background 0.2s;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #333;
+}
+
+.process-cell:hover {
+    background: #f5f5f5;
+}
+
+.process-cell:active {
+    background: #e8e8e8;
+}
+
+.product-cell.empty,
+.process-cell.empty {
+    color: #999;
+    font-style: italic;
+}
+
+/* Time Display */
+.time-display {
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    font-size: 0.7rem;
+    padding: 4px 6px;
+    background: #f5f5f5;
+    border-radius: 4px;
+    white-space: nowrap;
+    display: inline-block;
+    min-width: 70px;
+    text-align: center;
+}
+
+/* Buttons in table */
+.btn-table {
+    padding: 4px 8px;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.6rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    transition: all 0.2s;
+    color: white;
+    margin: 1px 0;
     width: 100%;
-    min-width: 55px;
+    min-width: 40px;
 }
 
-.row-btn:active {
-    transform: scale(0.94);
+.btn-table:active {
+    transform: scale(0.9);
 }
 
 .btn-stop {
-    background: #ff6b6b;
-    color: white;
-}
-
-.btn-stop:hover {
-    background: #ff5252;
+    background: #f44336;
 }
 
 .btn-pause {
-    background: #ffd93d;
-    color: #0a0a1a;
-}
-
-.btn-pause:hover {
-    background: #f5c842;
+    background: #FF9800;
 }
 
 .btn-resume {
-    background: #6bff6b;
-    color: #0a0a1a;
+    background: #4CAF50;
 }
 
-.btn-resume:hover {
-    background: #52e052;
-}
-
-.btn-delete {
-    background: transparent;
-    color: #ff6b6b;
-    font-size: 0.9rem;
+.btn-edit {
+    background: #2196F3;
     padding: 4px 6px;
-    min-width: auto;
-    width: auto;
+    font-size: 0.55rem;
 }
 
-.btn-delete:hover {
-    color: #ff5252;
-    background: rgba(255, 107, 107, 0.1);
-}
-
-.button-group {
+/* Delete button */
+.delete-btn {
+    background: #9E9E9E;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-size: 0.7rem;
+    cursor: pointer;
     display: flex;
-    gap: 4px;
-    width: 100%;
+    align-items: center;
     justify-content: center;
+    transition: all 0.2s;
+    margin: 0 auto;
 }
 
-/* Export */
-.export-container {
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 2px solid #16213e;
+.delete-btn:active {
+    transform: scale(0.8);
+    background: #f44336;
 }
 
-.btn-export {
-    background: #00d4ff;
-    color: #0a0a1a;
+/* Paused Time Display */
+.paused-display {
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    font-size: 0.65rem;
+    text-align: center;
+    background: #FFF3E0;
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+    min-width: 60px;
+}
+
+/* Action column */
+.action-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    align-items: center;
+}
+
+.action-cell .btn-table {
+    width: 100%;
+    min-width: 50px;
+}
+
+/* Add button at bottom */
+.add-bottom-btn {
     width: 100%;
     padding: 14px;
-    font-size: 1.1rem;
-}
-
-.btn-export:hover {
-    background: #00b8d4;
-}
-
-/* Empty state */
-.empty-state {
-    text-align: center;
-    padding: 40px 20px;
-    color: #a8b2d1;
     font-size: 1rem;
-    opacity: 0.6;
+    font-weight: 700;
+    background: linear-gradient(135deg, #2196F3, #1976D2);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
 }
 
-.empty-state-icon {
-    font-size: 3rem;
-    margin-bottom: 10px;
-    display: block;
+.add-bottom-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+}
+
+.add-bottom-btn:active {
+    transform: scale(0.98);
+}
+
+#tableFooter {
+    background: #f8f9fa;
+}
+
+#tableFooter td {
+    padding: 10px !important;
+    border-top: 2px solid #e0e0e0;
+}
+
+/* Form Modal */
+.form-modal {
+    max-width: 500px;
+    max-height: 95vh;
+}
+
+.entry-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.form-group label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #555;
+}
+
+.form-group input,
+.form-group textarea {
+    padding: 10px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: border-color 0.3s;
+    width: 100%;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #2196F3;
+    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 60px;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    animation: fadeIn 0.3s;
+    backdrop-filter: blur(4px);
+}
+
+.modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    animation: slideUp 0.3s ease-out;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.modal-header h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.modal-body {
+    padding: 20px 24px;
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 /* Responsive Design */
-@media (max-width: 480px) {
+@media (max-width: 768px) {
     .app-container {
-        padding: 10px;
-        border-radius: 12px;
+        padding: 5px;
+        padding-bottom: 60px;
     }
 
     .current-time {
-        font-size: 2.8rem;
+        font-size: 2rem;
     }
 
-    .current-date {
+    .action-buttons {
+        gap: 5px;
+    }
+
+    .btn {
+        font-size: 0.7rem;
+        padding: 10px 5px;
+        min-width: 60px;
+    }
+
+    #journalTable {
+        font-size: 0.65rem;
+        min-width: 500px;
+    }
+
+    #journalTable th {
+        font-size: 0.6rem;
+        padding: 8px 4px;
+    }
+
+    #journalTable td {
+        padding: 6px 4px;
+    }
+
+    .product-cell {
+        max-width: 70px;
+        font-size: 0.6rem;
+    }
+
+    .process-cell {
+        max-width: 100px;
+        font-size: 0.6rem;
+    }
+
+    .time-display {
+        font-size: 0.6rem;
+        min-width: 60px;
+        padding: 2px 4px;
+    }
+
+    .btn-table {
+        font-size: 0.5rem;
+        padding: 3px 5px;
+        min-width: 35px;
+    }
+
+    .delete-btn {
+        width: 20px;
+        height: 20px;
+        font-size: 0.6rem;
+    }
+
+    .paused-display {
+        font-size: 0.55rem;
+        min-width: 50px;
+    }
+
+    .modal-content {
+        max-width: 100%;
+        margin: 10px;
+        max-height: 95vh;
+    }
+
+    .modal-header {
+        padding: 16px 20px 12px;
+    }
+
+    .modal-body {
+        padding: 16px 20px;
+    }
+
+    .modal-header h3 {
         font-size: 1rem;
     }
 
-    .table-header {
-        font-size: 0.65rem;
-        padding: 8px 4px;
-        gap: 4px;
-        grid-template-columns: 35px 1fr 1fr 1fr;
+    .btn-sm {
+        padding: 6px 12px;
+        font-size: 0.7rem;
     }
 
-    .entry-row {
-        padding: 8px 4px;
-        gap: 4px;
-        grid-template-columns: 35px 1fr 1fr 1fr;
-    }
-
-    .entry-row .col-start {
+    .form-group input,
+    .form-group textarea {
         font-size: 0.9rem;
+        padding: 8px 10px;
     }
 
-    .entry-row .col-end .time-display {
-        font-size: 0.9rem;
+    .form-group label {
+        font-size: 0.75rem;
     }
 
-    .entry-row .col-paused {
-        font-size: 0.8rem;
-    }
-
-    .row-btn {
-        font-size: 0.6rem;
-        padding: 3px 6px;
-        min-width: 40px;
-    }
-
-    .btn {
-        padding: 10px;
+    .add-bottom-btn {
+        padding: 14px;
         font-size: 0.85rem;
     }
 
-    .button-group {
-        gap: 3px;
-        flex-wrap: wrap;
-    }
-
-    .col-no {
-        font-size: 0.8rem !important;
+    .action-cell {
+        gap: 2px;
     }
 }
 
-@media (max-width: 380px) {
+@media (max-width: 480px) {
     .current-time {
-        font-size: 2.2rem;
-    }
-
-    .table-header {
-        font-size: 0.55rem;
-        grid-template-columns: 30px 1fr 1fr 1fr;
-    }
-
-    .entry-row {
-        grid-template-columns: 30px 1fr 1fr 1fr;
-    }
-
-    .entry-row .col-start {
-        font-size: 0.75rem;
-    }
-
-    .entry-row .col-end .time-display {
-        font-size: 0.75rem;
-    }
-
-    .row-btn {
-        font-size: 0.5rem;
-        padding: 2px 4px;
-        min-width: 32px;
+        font-size: 1.6rem;
     }
 
     .btn {
-        font-size: 0.75rem;
-        padding: 8px;
+        font-size: 0.6rem;
+        padding: 8px 4px;
+        min-width: 50px;
     }
+
+    #journalTable {
+        font-size: 0.55rem;
+        min-width: 400px;
+    }
+
+    #journalTable th {
+        font-size: 0.5rem;
+        padding: 6px 3px;
+    }
+
+    #journalTable td {
+        padding: 4px 3px;
+    }
+
+    .product-cell {
+        max-width: 50px;
+        font-size: 0.55rem;
+    }
+
+    .process-cell {
+        max-width: 70px;
+        font-size: 0.55rem;
+    }
+
+    .time-display {
+        font-size: 0.5rem;
+        min-width: 50px;
+    }
+
+    .paused-display {
+        font-size: 0.5rem;
+        min-width: 45px;
+    }
+
+    .modal-header {
+        padding: 12px 16px 10px;
+    }
+
+    .modal-body {
+        padding: 12px 16px;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        font-size: 0.85rem;
+        padding: 6px 8px;
+    }
+
+    .add-bottom-btn {
+        padding: 12px;
+        font-size: 0.75rem;
+    }
+}
+
+/* Scrollbar Styling */
+.table-container::-webkit-scrollbar {
+    height: 6px;
+}
+
+.table-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
 }
