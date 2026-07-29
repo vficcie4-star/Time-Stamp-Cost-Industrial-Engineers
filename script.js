@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(updateDateTime, 1000);
     setupEventListeners();
     setupAutocomplete();
+    setupFullscreen();
+    setupFullscreenHint();
 });
 
 // Setup event listeners
@@ -31,6 +33,12 @@ function setupEventListeners() {
         }
     });
     
+    // Close hint
+    document.querySelector('.hint-close')?.addEventListener('click', () => {
+        document.getElementById('fullscreenHint').classList.remove('show');
+        localStorage.setItem('hideFullscreenHint', 'true');
+    });
+    
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && document.getElementById('formModal').classList.contains('active')) {
@@ -39,6 +47,7 @@ function setupEventListeners() {
         if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && document.getElementById('formModal').classList.contains('active')) {
             saveFormData();
         }
+        // F11 for fullscreen (browser default)
     });
 }
 
@@ -216,8 +225,6 @@ function addNewRow() {
             newRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     }, 200);
-    
-    // DO NOT auto-open form - user will click to edit
 }
 
 // Render a single row (compact view)
@@ -709,23 +716,6 @@ function updateStartTime(rowId) {
     }
 }
 
-// Auto-save on page unload
-window.addEventListener('beforeunload', () => {
-    saveData();
-});
-
-// Handle visibility change to keep timers accurate
-document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-        saveData();
-    } else {
-        rows.forEach(row => {
-            if (row.isPaused && !row.isStopped && row.pauseStartTime) {
-                startPauseTimer(row.id);
-            }
-        });
-    }
-});
 // Fullscreen functionality
 function setupFullscreen() {
     const fullscreenBtn = document.getElementById('fullscreenBtn');
@@ -744,10 +734,13 @@ function setupFullscreen() {
                     document.mozFullScreenElement;
         fullscreenBtn.textContent = isFS ? '⛶' : '⛶';
         fullscreenBtn.title = isFS ? 'Exit Fullscreen' : 'Enter Fullscreen';
+        fullscreenBtn.style.background = isFS ? 'rgba(76, 175, 80, 0.95)' : 'rgba(255, 255, 255, 0.95)';
+        fullscreenBtn.style.borderColor = isFS ? '#4CAF50' : '#ddd';
     }
     
     // Toggle fullscreen
-    fullscreenBtn.addEventListener('click', function() {
+    fullscreenBtn.addEventListener('click', function(e) {
+        e.preventDefault();
         const isFS = document.fullscreenElement || 
                     document.webkitFullscreenElement || 
                     document.mozFullScreenElement;
@@ -782,39 +775,44 @@ function setupFullscreen() {
     document.addEventListener('mozfullscreenchange', updateButtonIcon);
     document.addEventListener('MSFullscreenChange', updateButtonIcon);
     
-    // Auto-enter fullscreen on mobile if not in standalone mode
-    if (window.innerWidth <= 768 && !window.matchMedia('(display-mode: standalone)').matches) {
-        // Don't auto-enter, let user click the button
-        // But show a subtle hint
+    // Initial update
+    updateButtonIcon();
+}
+
+// Setup fullscreen hint for mobile
+function setupFullscreenHint() {
+    // Only show on mobile and if not in standalone mode
+    const isMobile = window.innerWidth <= 768;
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                        window.matchMedia('(display-mode: fullscreen)').matches;
+    const hintHidden = localStorage.getItem('hideFullscreenHint') === 'true';
+    
+    if (isMobile && !isStandalone && !hintHidden) {
         setTimeout(() => {
-            fullscreenBtn.style.animation = 'pulse 2s ease-in-out 3';
-        }, 1000);
+            document.getElementById('fullscreenHint').classList.add('show');
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                document.getElementById('fullscreenHint').classList.remove('show');
+            }, 5000);
+        }, 2000);
     }
 }
 
-// Add pulse animation for fullscreen button
-const styleSheet = document.createElement("style");
-styleSheet.textContent = `
-    @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.2); box-shadow: 0 0 20px rgba(33, 150, 243, 0.5); }
-        100% { transform: scale(1); }
+// Handle visibility change to keep timers accurate
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        saveData();
+    } else {
+        rows.forEach(row => {
+            if (row.isPaused && !row.isStopped && row.pauseStartTime) {
+                startPauseTimer(row.id);
+            }
+        });
     }
-`;
-document.head.appendChild(styleSheet);
-
-// Call setupFullscreen in DOMContentLoaded
-// Add this to your existing DOMContentLoaded event listener
-document.addEventListener('DOMContentLoaded', () => {
-    loadData();
-    updateDateTime();
-    setInterval(updateDateTime, 1000);
-    setupEventListeners();
-    setupAutocomplete();
-    setupFullscreen(); // Add this line
 });
 
-// Also handle fullscreen on orientation change
+// Handle orientation change
 window.addEventListener('orientationchange', () => {
     // If in fullscreen, keep it
     const isFS = document.fullscreenElement || 
@@ -842,6 +840,14 @@ window.addEventListener('resize', () => {
                 document.mozFullScreenElement;
     if (isFS) {
         // Adjust UI for fullscreen
-        document.querySelector('.app-container').style.maxWidth = '100vw';
+        const container = document.querySelector('.app-container');
+        if (container) {
+            container.style.maxWidth = '100vw';
+        }
     }
+});
+
+// Auto-save on page unload
+window.addEventListener('beforeunload', () => {
+    saveData();
 });
