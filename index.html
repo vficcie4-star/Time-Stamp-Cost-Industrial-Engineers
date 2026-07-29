@@ -22,7 +22,6 @@
         <div class="action-buttons">
             <button id="clearHistoryBtn" class="btn btn-danger">Clear History</button>
             <button id="exportCSVBtn" class="btn btn-success">Export CSV</button>
-            <button id="manageListsBtn" class="btn btn-info">Manage Lists</button>
         </div>
 
         <!-- Table Container -->
@@ -53,7 +52,7 @@
         </div>
     </div>
 
-    <!-- Form Modal -->
+    <!-- Modal for detailed form -->
     <div id="formModal" class="modal">
         <div class="modal-content form-modal">
             <div class="modal-header">
@@ -67,21 +66,18 @@
                 <form id="entryForm" class="entry-form">
                     <div class="form-group">
                         <label for="formSection">Section</label>
-                        <div class="autocomplete-wrapper">
-                            <input type="text" id="formSection" placeholder="Enter or select Section" autocomplete="off">
-                            <div id="sectionSuggestions" class="suggestions-list"></div>
-                        </div>
+                        <input type="text" id="formSection" placeholder="Enter Section" autocomplete="off">
+                        <div id="sectionSuggestions" class="suggestions-list"></div>
                     </div>
                     <div class="form-group">
                         <label for="formProduct">Product</label>
-                        <div class="autocomplete-wrapper">
-                            <input type="text" id="formProduct" placeholder="Enter or select Product" autocomplete="off">
-                            <div id="productSuggestions" class="suggestions-list"></div>
-                        </div>
+                        <input type="text" id="formProduct" placeholder="Enter Product" autocomplete="off">
+                        <div id="productSuggestions" class="suggestions-list"></div>
                     </div>
                     <div class="form-group">
                         <label for="formSKU">SKU</label>
-                        <input type="text" id="formSKU" placeholder="Enter SKU">
+                        <input type="text" id="formSKU" placeholder="Enter SKU" autocomplete="off">
+                        <div id="skuSuggestions" class="suggestions-list"></div>
                     </div>
                     <div class="form-group">
                         <label for="formProcess">Process</label>
@@ -89,7 +85,8 @@
                     </div>
                     <div class="form-group">
                         <label for="formWorkUnit">Work Unit</label>
-                        <input type="text" id="formWorkUnit" placeholder="Enter Work Unit">
+                        <input type="text" id="formWorkUnit" placeholder="Enter Work Unit" autocomplete="off">
+                        <div id="workUnitSuggestions" class="suggestions-list"></div>
                     </div>
                     <div class="form-group">
                         <label for="formOprt">Oprt</label>
@@ -104,43 +101,6 @@
                         <textarea id="formRemarks" rows="3" placeholder="Enter Remarks"></textarea>
                     </div>
                 </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Manage Lists Modal -->
-    <div id="manageListsModal" class="modal">
-        <div class="modal-content form-modal">
-            <div class="modal-header">
-                <h3>Manage Lists</h3>
-                <div class="modal-actions">
-                    <button id="manageListsCloseBtn" class="btn btn-danger btn-sm">Close</button>
-                    <button id="manageListsSaveBtn" class="btn btn-primary btn-sm">Save Changes</button>
-                </div>
-            </div>
-            <div class="modal-body">
-                <div class="manage-lists-container">
-                    <div class="list-management">
-                        <h4>Sections</h4>
-                        <div class="list-items" id="sectionsList">
-                            <!-- Sections will be rendered here -->
-                        </div>
-                        <div class="add-item-row">
-                            <input type="text" id="newSectionInput" placeholder="Add new section...">
-                            <button id="addSectionBtn" class="btn btn-sm btn-success">+</button>
-                        </div>
-                    </div>
-                    <div class="list-management">
-                        <h4>Products</h4>
-                        <div class="list-items" id="productsList">
-                            <!-- Products will be rendered here -->
-                        </div>
-                        <div class="add-item-row">
-                            <input type="text" id="newProductInput" placeholder="Add new product...">
-                            <button id="addProductBtn" class="btn btn-sm btn-success">+</button>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
