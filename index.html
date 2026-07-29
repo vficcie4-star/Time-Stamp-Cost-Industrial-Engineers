@@ -21,6 +21,7 @@
         <!-- Action Buttons -->
         <div class="action-buttons">
             <button id="clearHistoryBtn" class="btn btn-danger">Clear History</button>
+            <button id="notesBtn" class="btn btn-warning">Notes</button>
             <button id="exportCSVBtn" class="btn btn-success">Export CSV</button>
         </div>
 
@@ -101,6 +102,28 @@
                         <textarea id="formRemarks" rows="3" placeholder="Enter Remarks"></textarea>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Modal -->
+    <div id="notesModal" class="modal">
+        <div class="modal-content notes-modal">
+            <div class="modal-header">
+                <h3>📝 Notes</h3>
+                <div class="modal-actions">
+                    <button id="notesCancelBtn" class="btn btn-danger btn-sm">Cancel</button>
+                    <button id="notesSaveBtn" class="btn btn-primary btn-sm">Save</button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="notes-info">
+                    <small>Last saved: <span id="notesLastSaved">Never</span></small>
+                </div>
+                <textarea id="notesTextArea" rows="15" placeholder="Write your notes here..."></textarea>
+                <div class="notes-word-count">
+                    Words: <span id="wordCount">0</span> | Characters: <span id="charCount">0</span>
+                </div>
             </div>
         </div>
     </div>
