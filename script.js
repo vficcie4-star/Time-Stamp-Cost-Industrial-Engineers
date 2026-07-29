@@ -3,9 +3,26 @@ let rowCounter = 0;
 let rows = [];
 let pausedTimers = {};
 let currentTimeInterval = null;
-let editingRowId = null; // Track which row is being edited
-let notes = ''; // Store notes content
-let notesLastSaved = null; // Track last save time
+let editingRowId = null;
+let notes = '';
+let notesLastSaved = null;
+
+// Drag and drop variables
+let dragState = {
+    isDragging: false,
+    startX: 0,
+    startY: 0,
+    currentX: 0,
+    currentY: 0,
+    sourceRow: null,
+    sourceId: null,
+    clone: null,
+    longPressTimer: null,
+    isLongPress: false,
+    touchId: null,
+    dragOffsetX: 0,
+    dragOffsetY: 0
+};
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
@@ -15,7 +32,342 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
     setupAutocomplete();
     updateWordCount();
+    setupDragAndDrop();
 });
+
+// Setup drag and drop
+function setupDragAndDrop() {
+    const tbody = document.getElementById('tableBody');
+    
+    // Mouse events for desktop
+    tbody.addEventListener('mousedown', onDragStart);
+    document.addEventListener('mousemove', onDragMove);
+    document.addEventListener('mouseup', onDragEnd);
+    
+    // Touch events for mobile
+    tbody.addEventListener('touchstart', onTouchStart, { passive: false });
+    document.addEventListener('touchmove', onTouchMove, { passive: false });
+    document.addEventListener('touchend', onTouchEnd, { passive: false });
+    document.addEventListener('touchcancel', onTouchEnd, { passive: false });
+}
+
+// Touch start handler
+function onTouchStart(e) {
+    const touch = e.touches[0];
+    const target = e.target.closest('tr');
+    const dragHandle = e.target.closest('.drag-handle');
+    
+    if (!target || !dragHandle) return;
+    if (target.id === 'tableFooter') return;
+    if (target.closest('#tableFooter')) return;
+    
+    const rowId = parseInt(target.dataset.id);
+    if (isNaN(rowId)) return;
+    
+    // Store touch start position
+    const rect = target.getBoundingClientRect();
+    dragState.startX = touch.clientX;
+    dragState.startY = touch.clientY;
+    dragState.dragOffsetX = touch.clientX - rect.left;
+    dragState.dragOffsetY = touch.clientY - rect.top;
+    dragState.touchId = touch.identifier;
+    dragState.sourceRow = target;
+    dragState.sourceId = rowId;
+    dragState.isLongPress = false;
+    
+    // Start long press timer (600ms for mobile)
+    clearTimeout(dragState.longPressTimer);
+    dragState.longPressTimer = setTimeout(() => {
+        if (dragState.sourceRow) {
+            dragState.isLongPress = true;
+            startDragging(dragState.sourceRow, dragState.sourceId, touch.clientX, touch.clientY);
+        }
+    }, 600);
+}
+
+// Touch move handler
+function onTouchMove(e) {
+    if (!dragState.isDragging) {
+        // Check if user moved too much (cancel long press)
+        const touch = e.touches[0];
+        if (dragState.startX && dragState.startY) {
+            const dx = Math.abs(touch.clientX - dragState.startX);
+            const dy = Math.abs(touch.clientY - dragState.startY);
+            if (dx > 10 || dy > 10) {
+                clearTimeout(dragState.longPressTimer);
+                dragState.sourceRow = null;
+            }
+        }
+        return;
+    }
+    
+    e.preventDefault();
+    const touch = e.touches[0];
+    dragState.currentX = touch.clientX;
+    dragState.currentY = touch.clientY;
+    
+    // Update clone position
+    if (dragState.clone) {
+        dragState.clone.style.left = (touch.clientX - dragState.dragOffsetX) + 'px';
+        dragState.clone.style.top = (touch.clientY - dragState.dragOffsetY) + 'px';
+    }
+    
+    // Find drop target
+    findDropTarget(touch.clientX, touch.clientY);
+}
+
+// Touch end handler
+function onTouchEnd(e) {
+    clearTimeout(dragState.longPressTimer);
+    
+    if (dragState.isDragging) {
+        e.preventDefault();
+        finishDragging();
+    }
+    
+    // Reset state
+    dragState.sourceRow = null;
+    dragState.startX = 0;
+    dragState.startY = 0;
+    dragState.isLongPress = false;
+    dragState.touchId = null;
+}
+
+// Mouse down handler (desktop)
+function onDragStart(e) {
+    const target = e.target.closest('tr');
+    const dragHandle = e.target.closest('.drag-handle');
+    
+    if (!target || !dragHandle) return;
+    if (target.id === 'tableFooter') return;
+    if (target.closest('#tableFooter')) return;
+    
+    const rowId = parseInt(target.dataset.id);
+    if (isNaN(rowId)) return;
+    
+    // For desktop, start dragging immediately on mousedown on drag handle
+    const rect = target.getBoundingClientRect();
+    dragState.startX = e.clientX;
+    dragState.startY = e.clientY;
+    dragState.dragOffsetX = e.clientX - rect.left;
+    dragState.dragOffsetY = e.clientY - rect.top;
+    dragState.sourceRow = target;
+    dragState.sourceId = rowId;
+    dragState.isLongPress = true;
+    
+    startDragging(target, rowId, e.clientX, e.clientY);
+    e.preventDefault();
+}
+
+// Mouse move handler (desktop)
+function onDragMove(e) {
+    if (!dragState.isDragging) return;
+    
+    e.preventDefault();
+    dragState.currentX = e.clientX;
+    dragState.currentY = e.clientY;
+    
+    // Update clone position
+    if (dragState.clone) {
+        dragState.clone.style.left = (e.clientX - dragState.dragOffsetX) + 'px';
+        dragState.clone.style.top = (e.clientY - dragState.dragOffsetY) + 'px';
+    }
+    
+    // Find drop target
+    findDropTarget(e.clientX, e.clientY);
+}
+
+// Mouse up handler (desktop)
+function onDragEnd(e) {
+    if (dragState.isDragging) {
+        finishDragging();
+    }
+    
+    // Reset state
+    dragState.sourceRow = null;
+    dragState.startX = 0;
+    dragState.startY = 0;
+    dragState.isLongPress = false;
+}
+
+// Find drop target
+function findDropTarget(clientX, clientY) {
+    // Get all rows except the source row and footer
+    const rows = document.querySelectorAll('#tableBody tr:not(.dragging)');
+    let targetRow = null;
+    let insertBefore = false;
+    
+    for (const row of rows) {
+        const rect = row.getBoundingClientRect();
+        // Check if point is over this row
+        if (clientX >= rect.left && clientX <= rect.right &&
+            clientY >= rect.top && clientY <= rect.bottom) {
+            targetRow = row;
+            // Check if we should insert before or after
+            const midY = rect.top + rect.height / 2;
+            insertBefore = clientY < midY;
+            break;
+        }
+    }
+    
+    // Remove existing drag-over classes
+    document.querySelectorAll('#tableBody tr.drag-over, #tableBody tr.drag-over-top').forEach(el => {
+        el.classList.remove('drag-over', 'drag-over-top');
+    });
+    
+    if (targetRow && targetRow !== dragState.sourceRow) {
+        if (insertBefore) {
+            targetRow.classList.add('drag-over-top');
+        } else {
+            targetRow.classList.add('drag-over');
+        }
+    }
+}
+
+// Start dragging
+function startDragging(row, rowId, x, y) {
+    if (dragState.isDragging) return;
+    
+    dragState.isDragging = true;
+    dragState.sourceRow = row;
+    dragState.sourceId = rowId;
+    
+    // Get row dimensions
+    const rect = row.getBoundingClientRect();
+    
+    // Add dragging class to source row
+    row.classList.add('dragging');
+    
+    // Create clone
+    const clone = row.cloneNode(true);
+    clone.style.position = 'fixed';
+    clone.style.width = rect.width + 'px';
+    clone.style.pointerEvents = 'none';
+    clone.style.zIndex = '10000';
+    clone.style.opacity = '0.9';
+    clone.style.transform = 'scale(1.02) rotate(-1deg)';
+    clone.style.boxShadow = '0 10px 40px rgba(0,0,0,0.3)';
+    clone.style.borderRadius = '8px';
+    clone.style.backgroundColor = 'white';
+    clone.style.left = (x - dragState.dragOffsetX) + 'px';
+    clone.style.top = (y - dragState.dragOffsetY) + 'px';
+    clone.id = 'drag-clone';
+    
+    // Remove interactions from clone
+    clone.querySelectorAll('button, .drag-handle, .product-cell, .process-cell').forEach(el => {
+        el.style.pointerEvents = 'none';
+        if (el.onclick) {
+            el.onclick = null;
+        }
+    });
+    
+    document.body.appendChild(clone);
+    dragState.clone = clone;
+    
+    // Show drag indicator
+    const indicator = document.getElementById('dragIndicator');
+    indicator.classList.add('active');
+    indicator.style.left = x + 'px';
+    indicator.style.top = y + 'px';
+}
+
+// Finish dragging
+function finishDragging() {
+    if (!dragState.isDragging) return;
+    
+    // Find drop target
+    const targetRow = document.querySelector('#tableBody tr.drag-over, #tableBody tr.drag-over-top');
+    
+    if (targetRow && dragState.sourceRow && dragState.sourceRow !== targetRow) {
+        const targetId = parseInt(targetRow.dataset.id);
+        const sourceId = dragState.sourceId;
+        
+        if (!isNaN(targetId) && !isNaN(sourceId) && targetId !== sourceId) {
+            const insertBefore = targetRow.classList.contains('drag-over-top');
+            // Perform reorder
+            reorderRows(sourceId, targetId, insertBefore);
+        }
+    }
+    
+    // Clean up
+    cleanupDrag();
+}
+
+// Cleanup drag state
+function cleanupDrag() {
+    // Remove drag classes
+    document.querySelectorAll('#tableBody tr.dragging, #tableBody tr.drag-over, #tableBody tr.drag-over-top').forEach(el => {
+        el.classList.remove('dragging', 'drag-over', 'drag-over-top');
+    });
+    
+    // Remove clone
+    if (dragState.clone) {
+        dragState.clone.remove();
+        dragState.clone = null;
+    }
+    
+    // Hide indicator
+    const indicator = document.getElementById('dragIndicator');
+    indicator.classList.remove('active');
+    
+    dragState.isDragging = false;
+    dragState.sourceRow = null;
+    dragState.sourceId = null;
+}
+
+// Reorder rows
+function reorderRows(sourceId, targetId, insertBefore) {
+    // Find indices
+    const sourceIndex = rows.findIndex(r => r.id === sourceId);
+    const targetIndex = rows.findIndex(r => r.id === targetId);
+    
+    if (sourceIndex === -1 || targetIndex === -1) return;
+    if (sourceIndex === targetIndex) return;
+    
+    // Remove source from array
+    const [sourceRow] = rows.splice(sourceIndex, 1);
+    
+    // Calculate new insert position
+    let insertIndex = targetIndex;
+    
+    // Adjust if source was before target and we removed it
+    if (sourceIndex < targetIndex) {
+        insertIndex = targetIndex - 1;
+    }
+    
+    // Insert at the correct position
+    if (insertBefore) {
+        // Insert before target
+        rows.splice(insertIndex, 0, sourceRow);
+    } else {
+        // Insert after target
+        rows.splice(insertIndex + 1, 0, sourceRow);
+    }
+    
+    // Re-render all rows
+    renumberAndRender();
+    saveData();
+}
+
+// Renumber and render all rows
+function renumberAndRender() {
+    // Clear table body
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '';
+    
+    // Reassign IDs and render
+    rows.forEach((row, index) => {
+        row.id = index + 1;
+        renderRow(row);
+        // Restart pause timers if needed
+        if (row.isPaused && !row.isStopped) {
+            startPauseTimer(row.id);
+        }
+    });
+    
+    rowCounter = rows.length;
+    saveData();
+}
 
 // Setup event listeners
 function setupEventListeners() {
@@ -91,17 +443,13 @@ function openNotesModal() {
     const modal = document.getElementById('notesModal');
     const textarea = document.getElementById('notesTextArea');
     
-    // Load existing notes
     textarea.value = notes || '';
     updateWordCount();
-    
-    // Update last saved info
     updateLastSavedInfo();
     
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
     
-    // Focus on textarea
     setTimeout(() => {
         textarea.focus();
         textarea.setSelectionRange(textarea.value.length, textarea.value.length);
@@ -170,7 +518,6 @@ function setupInputAutocomplete(inputId, suggestionsId, dataList) {
             return;
         }
         
-        // Filter suggestions
         const matches = dataList.filter(item => 
             item.toLowerCase().includes(value)
         );
@@ -180,12 +527,10 @@ function setupInputAutocomplete(inputId, suggestionsId, dataList) {
             return;
         }
         
-        // Create suggestion items
         matches.forEach((item, index) => {
             const div = document.createElement('div');
             div.className = 'suggestion-item';
             
-            // Highlight matching part
             const matchIndex = item.toLowerCase().indexOf(value);
             if (matchIndex !== -1) {
                 const before = item.substring(0, matchIndex);
@@ -202,7 +547,6 @@ function setupInputAutocomplete(inputId, suggestionsId, dataList) {
             div.addEventListener('click', function() {
                 input.value = this.dataset.value;
                 suggestionsContainer.classList.remove('active');
-                // Trigger input event to hide suggestions
                 input.dispatchEvent(new Event('input'));
             });
             
@@ -213,7 +557,6 @@ function setupInputAutocomplete(inputId, suggestionsId, dataList) {
         currentFocus = -1;
     });
     
-    // Keyboard navigation for suggestions
     input.addEventListener('keydown', function(e) {
         const items = suggestionsContainer.querySelectorAll('.suggestion-item');
         
@@ -242,7 +585,6 @@ function setupInputAutocomplete(inputId, suggestionsId, dataList) {
         }
     });
     
-    // Close suggestions on blur
     input.addEventListener('blur', function() {
         setTimeout(() => {
             suggestionsContainer.classList.remove('active');
@@ -308,10 +650,8 @@ function addNewRow() {
     renderRow(rowData);
     saveData();
     
-    // Auto-set start time
     setTimeout(() => updateStartTime(rowId), 100);
     
-    // Scroll to the new row
     setTimeout(() => {
         const newRow = document.getElementById(`row-${rowId}`);
         if (newRow) {
@@ -332,6 +672,7 @@ function renderRow(data) {
     tdNo.textContent = data.id;
     tdNo.style.fontWeight = '600';
     tdNo.style.textAlign = 'center';
+    tdNo.style.width = '40px';
     tr.appendChild(tdNo);
     
     // Product - Clickable to open form
@@ -418,6 +759,14 @@ function renderRow(data) {
     const actionDiv = document.createElement('div');
     actionDiv.className = 'action-cell';
     
+    // Drag handle
+    const dragHandle = document.createElement('div');
+    dragHandle.className = 'drag-handle';
+    dragHandle.textContent = '⋮⋮';
+    dragHandle.title = 'Drag to reorder';
+    dragHandle.setAttribute('aria-label', 'Drag to reorder');
+    actionDiv.appendChild(dragHandle);
+    
     // Edit button
     const editBtn = document.createElement('button');
     editBtn.textContent = '✎';
@@ -461,7 +810,6 @@ function openFormModal(rowId) {
     
     title.textContent = `Entry #${row.id} - ${row.product || 'New Entry'}`;
     
-    // Populate form fields
     document.getElementById('formSection').value = row.section || '';
     document.getElementById('formProduct').value = row.product || '';
     document.getElementById('formSKU').value = row.sku || '';
@@ -474,7 +822,6 @@ function openFormModal(rowId) {
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
     
-    // Focus on first field
     setTimeout(() => {
         document.getElementById('formSection').focus();
     }, 200);
@@ -495,7 +842,6 @@ function saveFormData() {
     const row = rows.find(r => r.id === editingRowId);
     if (!row) return;
     
-    // Get form values
     row.section = document.getElementById('formSection').value.trim();
     row.product = document.getElementById('formProduct').value.trim();
     row.sku = document.getElementById('formSKU').value.trim();
@@ -505,7 +851,6 @@ function saveFormData() {
     row.mte = document.getElementById('formMTE').value.trim();
     row.remarks = document.getElementById('formRemarks').value.trim();
     
-    // Update display
     updateRowDisplay(row.id);
     saveData();
     closeFormModal();
@@ -521,14 +866,12 @@ function updateRowDisplay(rowId) {
     
     const cells = rowElement.querySelectorAll('td');
     
-    // Update Product
     const productDiv = cells[1]?.querySelector('.product-cell');
     if (productDiv) {
         productDiv.textContent = row.product || 'Tap to add';
         productDiv.className = 'product-cell' + (row.product ? '' : ' empty');
     }
     
-    // Update Process
     const processDiv = cells[2]?.querySelector('.process-cell');
     if (processDiv) {
         processDiv.textContent = row.process || 'Tap to add';
@@ -553,17 +896,14 @@ function stopTimer(rowId) {
     row.isStopped = true;
     row.isPaused = false;
     
-    // Clear pause timer if any
     if (pausedTimers[rowId]) {
         clearInterval(pausedTimers[rowId]);
         delete pausedTimers[rowId];
     }
     
-    // Update display
     const endDisplay = document.getElementById(`endTimeDisplay-${rowId}`);
     if (endDisplay) endDisplay.textContent = timeStr;
     
-    // Update button states
     const rowElement = document.getElementById(`row-${rowId}`);
     if (rowElement) {
         const buttons = rowElement.querySelectorAll('.btn-table');
@@ -576,7 +916,6 @@ function stopTimer(rowId) {
         });
     }
     
-    // Update paused time display
     const pausedDisplay = document.getElementById(`pausedDisplay-${rowId}`);
     if (pausedDisplay) {
         pausedDisplay.textContent = formatPausedTime(row.pausedTime || 0);
@@ -596,7 +935,6 @@ function togglePause(rowId) {
     const pauseBtn = rowElement.querySelector('.btn-table.btn-pause, .btn-table.btn-resume');
     
     if (row.isPaused) {
-        // Resume
         row.isPaused = false;
         if (pausedTimers[rowId]) {
             clearInterval(pausedTimers[rowId]);
@@ -612,7 +950,6 @@ function togglePause(rowId) {
             pauseBtn.className = 'btn-table btn-pause';
         }
     } else {
-        // Pause
         row.isPaused = true;
         row.pauseStartTime = Date.now();
         if (pauseBtn) {
@@ -655,7 +992,6 @@ function formatPausedTime(seconds) {
 // Delete row
 function deleteRow(rowId) {
     if (confirm('Delete this entry?')) {
-        // Clear pause timer
         if (pausedTimers[rowId]) {
             clearInterval(pausedTimers[rowId]);
             delete pausedTimers[rowId];
@@ -667,35 +1003,13 @@ function deleteRow(rowId) {
             rowElement.remove();
         }
         saveData();
-        renumberRows();
+        renumberAndRender();
     }
-}
-
-// Renumber rows
-function renumberRows() {
-    const tbody = document.getElementById('tableBody');
-    const rowElements = tbody.querySelectorAll('tr');
-    
-    rowElements.forEach((row, index) => {
-        const tdNo = row.querySelector('td:first-child');
-        if (tdNo) {
-            tdNo.textContent = index + 1;
-        }
-        const rowId = parseInt(row.dataset.id);
-        const rowData = rows.find(r => r.id === rowId);
-        if (rowData) {
-            rowData.id = index + 1;
-        }
-        row.dataset.id = index + 1;
-    });
-    rowCounter = rows.length;
-    saveData();
 }
 
 // Clear history
 function clearHistory() {
     if (confirm('Clear all history and notes?')) {
-        // Clear all timers
         Object.keys(pausedTimers).forEach(key => {
             clearInterval(pausedTimers[key]);
             delete pausedTimers[key];
@@ -705,7 +1019,6 @@ function clearHistory() {
         rowCounter = 0;
         document.getElementById('tableBody').innerHTML = '';
         
-        // Clear notes as well
         notes = '';
         notesLastSaved = null;
         
@@ -717,13 +1030,11 @@ function clearHistory() {
 function exportCSV() {
     let csvContent = '';
     
-    // Add notes as a separate sheet (section)
     if (notes && notes.trim()) {
         csvContent += '=== NOTES ===\n';
         csvContent += `"${notes.replace(/"/g, '""')}"\n\n`;
     }
     
-    // Add journal data
     if (rows.length === 0 && !notes.trim()) {
         alert('No data to export');
         return;
@@ -756,7 +1067,6 @@ function exportCSV() {
         });
     }
     
-    // Create download
     const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
@@ -794,18 +1104,15 @@ function loadData() {
             notes = parsed.notes || '';
             notesLastSaved = parsed.notesLastSaved ? new Date(parsed.notesLastSaved) : null;
             
-            // Render all rows
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
             rows.forEach(row => {
                 renderRow(row);
-                // Restart pause timers if needed
                 if (row.isPaused && !row.isStopped) {
                     startPauseTimer(row.id);
                 }
             });
             
-            // Update notes last saved display if modal is open
             updateLastSavedInfo();
         }
     } catch (e) {
