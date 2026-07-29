@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(updateDateTime, 1000);
     setupEventListeners();
     setupAutocomplete();
-    setupListManagement();
 });
 
 // Setup event listeners
@@ -20,289 +19,145 @@ function setupEventListeners() {
     document.getElementById('addRowBtn').addEventListener('click', addNewRow);
     document.getElementById('clearHistoryBtn').addEventListener('click', clearHistory);
     document.getElementById('exportCSVBtn').addEventListener('click', exportCSV);
-    document.getElementById('manageListsBtn').addEventListener('click', openManageLists);
     
     // Form modal event listeners
     document.getElementById('formCancelBtn').addEventListener('click', closeFormModal);
     document.getElementById('formSaveBtn').addEventListener('click', saveFormData);
     
-    // Manage lists modal
-    document.getElementById('manageListsCloseBtn').addEventListener('click', closeManageLists);
-    document.getElementById('manageListsSaveBtn').addEventListener('click', saveManageLists);
-    document.getElementById('addSectionBtn').addEventListener('click', () => addListItem('section'));
-    document.getElementById('addProductBtn').addEventListener('click', () => addListItem('product'));
-    
-    // Enter key for adding items
-    document.getElementById('newSectionInput').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') addListItem('section');
-    });
-    document.getElementById('newProductInput').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') addListItem('product');
-    });
-    
-    // Close modals on backdrop click
+    // Close modal on backdrop click
     document.getElementById('formModal').addEventListener('click', (e) => {
-        if (e.target === e.currentTarget) closeFormModal();
-    });
-    document.getElementById('manageListsModal').addEventListener('click', (e) => {
-        if (e.target === e.currentTarget) closeManageLists();
+        if (e.target === e.currentTarget) {
+            closeFormModal();
+        }
     });
     
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            if (document.getElementById('formModal').classList.contains('active')) {
-                closeFormModal();
-            }
-            if (document.getElementById('manageListsModal').classList.contains('active')) {
-                closeManageLists();
-            }
+        if (e.key === 'Escape' && document.getElementById('formModal').classList.contains('active')) {
+            closeFormModal();
         }
-        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-            if (document.getElementById('formModal').classList.contains('active')) {
-                saveFormData();
-            }
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && document.getElementById('formModal').classList.contains('active')) {
+            saveFormData();
         }
     });
 }
 
-// Setup autocomplete for Section and Product
+// Setup autocomplete for inputs
 function setupAutocomplete() {
-    const sectionInput = document.getElementById('formSection');
-    const productInput = document.getElementById('formProduct');
-    const sectionSuggestions = document.getElementById('sectionSuggestions');
-    const productSuggestions = document.getElementById('productSuggestions');
-    
-    // Section autocomplete
-    sectionInput.addEventListener('input', function() {
-        const value = this.value.toLowerCase();
-        const suggestions = CONFIG.sections.filter(s => 
-            s.toLowerCase().includes(value)
-        );
-        showSuggestions(sectionSuggestions, suggestions, value, this, 'section');
-    });
-    
-    sectionInput.addEventListener('blur', function() {
-        setTimeout(() => {
-            sectionSuggestions.classList.remove('active');
-        }, 200);
-    });
-    
-    sectionInput.addEventListener('focus', function() {
-        if (this.value) {
-            const value = this.value.toLowerCase();
-            const suggestions = CONFIG.sections.filter(s => 
-                s.toLowerCase().includes(value)
-            );
-            showSuggestions(sectionSuggestions, suggestions, value, this, 'section');
-        } else {
-            // Show all suggestions when empty
-            showSuggestions(sectionSuggestions, CONFIG.sections, '', this, 'section');
-        }
-    });
-    
-    // Product autocomplete
-    productInput.addEventListener('input', function() {
-        const value = this.value.toLowerCase();
-        const suggestions = CONFIG.products.filter(p => 
-            p.toLowerCase().includes(value)
-        );
-        showSuggestions(productSuggestions, suggestions, value, this, 'product');
-    });
-    
-    productInput.addEventListener('blur', function() {
-        setTimeout(() => {
-            productSuggestions.classList.remove('active');
-        }, 200);
-    });
-    
-    productInput.addEventListener('focus', function() {
-        if (this.value) {
-            const value = this.value.toLowerCase();
-            const suggestions = CONFIG.products.filter(p => 
-                p.toLowerCase().includes(value)
-            );
-            showSuggestions(productSuggestions, suggestions, value, this, 'product');
-        } else {
-            // Show all suggestions when empty
-            showSuggestions(productSuggestions, CONFIG.products, '', this, 'product');
-        }
-    });
+    setupInputAutocomplete('formSection', 'sectionSuggestions', CONFIG.sections);
+    setupInputAutocomplete('formProduct', 'productSuggestions', CONFIG.products);
+    setupInputAutocomplete('formSKU', 'skuSuggestions', CONFIG.skus || []);
+    setupInputAutocomplete('formWorkUnit', 'workUnitSuggestions', CONFIG.workUnits || []);
 }
 
-// Show suggestions
-function showSuggestions(container, suggestions, query, input, type) {
-    container.innerHTML = '';
+// Setup autocomplete for a specific input
+function setupInputAutocomplete(inputId, suggestionsId, dataList) {
+    const input = document.getElementById(inputId);
+    const suggestionsContainer = document.getElementById(suggestionsId);
     
-    if (suggestions.length === 0) {
-        container.classList.remove('active');
-        return;
-    }
+    if (!input || !suggestionsContainer || !dataList) return;
     
-    suggestions.forEach(suggestion => {
-        const div = document.createElement('div');
-        div.className = 'suggestion-item';
+    let currentFocus = -1;
+    
+    input.addEventListener('input', function(e) {
+        const value = this.value.toLowerCase();
+        suggestionsContainer.innerHTML = '';
         
-        // Highlight matching text
-        const index = suggestion.toLowerCase().indexOf(query.toLowerCase());
-        if (index !== -1 && query) {
-            const before = suggestion.substring(0, index);
-            const match = suggestion.substring(index, index + query.length);
-            const after = suggestion.substring(index + query.length);
-            div.innerHTML = `${before}<span class="highlight">${match}</span>${after}`;
-        } else {
-            div.textContent = suggestion;
+        if (!value) {
+            suggestionsContainer.classList.remove('active');
+            return;
         }
         
-        // Add label
-        const label = document.createElement('span');
-        label.className = 'suggestion-label';
-        label.textContent = type === 'section' ? '📁' : '📦';
-        div.appendChild(label);
+        // Filter suggestions
+        const matches = dataList.filter(item => 
+            item.toLowerCase().includes(value)
+        );
         
-        div.addEventListener('mousedown', function(e) {
-            e.preventDefault();
-            input.value = suggestion;
-            container.classList.remove('active');
-            // Trigger input event to update any dependencies
-            input.dispatchEvent(new Event('input'));
+        if (matches.length === 0) {
+            suggestionsContainer.classList.remove('active');
+            return;
+        }
+        
+        // Create suggestion items
+        matches.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = 'suggestion-item';
+            
+            // Highlight matching part
+            const matchIndex = item.toLowerCase().indexOf(value);
+            if (matchIndex !== -1) {
+                const before = item.substring(0, matchIndex);
+                const match = item.substring(matchIndex, matchIndex + value.length);
+                const after = item.substring(matchIndex + value.length);
+                div.innerHTML = before + '<span class="match-highlight">' + match + '</span>' + after;
+            } else {
+                div.textContent = item;
+            }
+            
+            div.dataset.value = item;
+            div.dataset.index = index;
+            
+            div.addEventListener('click', function() {
+                input.value = this.dataset.value;
+                suggestionsContainer.classList.remove('active');
+                // Trigger input event to hide suggestions
+                input.dispatchEvent(new Event('input'));
+            });
+            
+            suggestionsContainer.appendChild(div);
         });
         
-        container.appendChild(div);
+        suggestionsContainer.classList.add('active');
+        currentFocus = -1;
     });
     
-    container.classList.add('active');
-}
-
-// Setup list management
-function setupListManagement() {
-    renderListItems();
-}
-
-// Render list items in management modal
-function renderListItems() {
-    const sectionsContainer = document.getElementById('sectionsList');
-    const productsContainer = document.getElementById('productsList');
-    
-    sectionsContainer.innerHTML = '';
-    CONFIG.sections.forEach((item, index) => {
-        const tag = createListItemTag(item, 'section', index);
-        sectionsContainer.appendChild(tag);
-    });
-    
-    productsContainer.innerHTML = '';
-    CONFIG.products.forEach((item, index) => {
-        const tag = createListItemTag(item, 'product', index);
-        productsContainer.appendChild(tag);
-    });
-}
-
-// Create list item tag
-function createListItemTag(item, type, index) {
-    const div = document.createElement('div');
-    div.className = 'list-item-tag';
-    div.textContent = item;
-    
-    const removeBtn = document.createElement('button');
-    removeBtn.className = 'remove-item';
-    removeBtn.textContent = '×';
-    removeBtn.title = 'Remove this item';
-    removeBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        if (confirm(`Remove "${item}" from ${type}s?`)) {
-            if (type === 'section') {
-                CONFIG.sections.splice(index, 1);
-            } else {
-                CONFIG.products.splice(index, 1);
+    // Keyboard navigation for suggestions
+    input.addEventListener('keydown', function(e) {
+        const items = suggestionsContainer.querySelectorAll('.suggestion-item');
+        
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            currentFocus++;
+            if (currentFocus >= items.length) currentFocus = 0;
+            highlightItem(items, currentFocus);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            currentFocus--;
+            if (currentFocus < 0) currentFocus = items.length - 1;
+            highlightItem(items, currentFocus);
+        } else if (e.key === 'Enter') {
+            if (currentFocus >= 0 && currentFocus < items.length) {
+                e.preventDefault();
+                const selectedItem = items[currentFocus];
+                if (selectedItem) {
+                    input.value = selectedItem.dataset.value;
+                    suggestionsContainer.classList.remove('active');
+                    input.dispatchEvent(new Event('input'));
+                }
             }
-            renderListItems();
-            // Update autocomplete suggestions
-            setupAutocomplete();
+        } else if (e.key === 'Escape') {
+            suggestionsContainer.classList.remove('active');
         }
     });
     
-    div.appendChild(removeBtn);
-    return div;
+    // Close suggestions on blur
+    input.addEventListener('blur', function() {
+        setTimeout(() => {
+            suggestionsContainer.classList.remove('active');
+        }, 200);
+    });
 }
 
-// Add list item
-function addListItem(type) {
-    const input = type === 'section' ? 
-        document.getElementById('newSectionInput') : 
-        document.getElementById('newProductInput');
-    
-    const value = input.value.trim();
-    if (!value) return;
-    
-    if (type === 'section') {
-        if (!CONFIG.sections.includes(value)) {
-            CONFIG.sections.push(value);
-            CONFIG.sections.sort();
-            renderListItems();
-            setupAutocomplete();
-            input.value = '';
+// Highlight suggestion item
+function highlightItem(items, index) {
+    items.forEach((item, i) => {
+        if (i === index) {
+            item.classList.add('highlighted');
+            item.scrollIntoView({ block: 'nearest' });
         } else {
-            alert('This item already exists!');
+            item.classList.remove('highlighted');
         }
-    } else {
-        if (!CONFIG.products.includes(value)) {
-            CONFIG.products.push(value);
-            CONFIG.products.sort();
-            renderListItems();
-            setupAutocomplete();
-            input.value = '';
-        } else {
-            alert('This item already exists!');
-        }
-    }
-}
-
-// Open manage lists modal
-function openManageLists() {
-    const modal = document.getElementById('manageListsModal');
-    renderListItems();
-    modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
-}
-
-// Close manage lists modal
-function closeManageLists() {
-    const modal = document.getElementById('manageListsModal');
-    modal.classList.remove('active');
-    document.body.style.overflow = '';
-}
-
-// Save manage lists (just close and save to localStorage)
-function saveManageLists() {
-    saveConfigToLocalStorage();
-    closeManageLists();
-    alert('Lists have been saved!');
-}
-
-// Save config to localStorage
-function saveConfigToLocalStorage() {
-    try {
-        localStorage.setItem('journalConfig', JSON.stringify({
-            sections: CONFIG.sections,
-            products: CONFIG.products
-        }));
-    } catch (e) {
-        console.error('Error saving config:', e);
-    }
-}
-
-// Load config from localStorage
-function loadConfigFromLocalStorage() {
-    try {
-        const savedConfig = localStorage.getItem('journalConfig');
-        if (savedConfig) {
-            const parsed = JSON.parse(savedConfig);
-            CONFIG.sections = parsed.sections || CONFIG.sections;
-            CONFIG.products = parsed.products || CONFIG.products;
-        }
-    } catch (e) {
-        console.error('Error loading config:', e);
-    }
+    });
 }
 
 // Update current time and date
@@ -362,10 +217,7 @@ function addNewRow() {
         }
     }, 200);
     
-    // Open form for editing
-    setTimeout(() => {
-        openFormModal(rowId);
-    }, 300);
+    // DO NOT auto-open form - user will click to edit
 }
 
 // Render a single row (compact view)
@@ -522,16 +374,10 @@ function openFormModal(rowId) {
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
     
-    // Trigger autocomplete to show suggestions
+    // Focus on first field
     setTimeout(() => {
-        const sectionInput = document.getElementById('formSection');
-        const productInput = document.getElementById('formProduct');
-        if (sectionInput.value) {
-            sectionInput.dispatchEvent(new Event('focus'));
-        } else {
-            sectionInput.dispatchEvent(new Event('focus'));
-        }
-    }, 100);
+        document.getElementById('formSection').focus();
+    }, 200);
 }
 
 // Close form modal
@@ -540,10 +386,6 @@ function closeFormModal() {
     modal.classList.remove('active');
     document.body.style.overflow = '';
     editingRowId = null;
-    
-    // Hide suggestions
-    document.getElementById('sectionSuggestions').classList.remove('active');
-    document.getElementById('productSuggestions').classList.remove('active');
 }
 
 // Save form data
@@ -594,7 +436,7 @@ function updateRowDisplay(rowId) {
     }
 }
 
-// Stop timer (same as before)
+// Stop timer
 function stopTimer(rowId) {
     const row = rows.find(r => r.id === rowId);
     if (!row || row.isStopped) return;
@@ -611,14 +453,17 @@ function stopTimer(rowId) {
     row.isStopped = true;
     row.isPaused = false;
     
+    // Clear pause timer if any
     if (pausedTimers[rowId]) {
         clearInterval(pausedTimers[rowId]);
         delete pausedTimers[rowId];
     }
     
+    // Update display
     const endDisplay = document.getElementById(`endTimeDisplay-${rowId}`);
     if (endDisplay) endDisplay.textContent = timeStr;
     
+    // Update button states
     const rowElement = document.getElementById(`row-${rowId}`);
     if (rowElement) {
         const buttons = rowElement.querySelectorAll('.btn-table');
@@ -631,6 +476,7 @@ function stopTimer(rowId) {
         });
     }
     
+    // Update paused time display
     const pausedDisplay = document.getElementById(`pausedDisplay-${rowId}`);
     if (pausedDisplay) {
         pausedDisplay.textContent = formatPausedTime(row.pausedTime || 0);
@@ -639,7 +485,7 @@ function stopTimer(rowId) {
     saveData();
 }
 
-// Toggle pause (same as before)
+// Toggle pause
 function togglePause(rowId) {
     const row = rows.find(r => r.id === rowId);
     if (!row || row.isStopped) return;
@@ -650,6 +496,7 @@ function togglePause(rowId) {
     const pauseBtn = rowElement.querySelector('.btn-table.btn-pause, .btn-table.btn-resume');
     
     if (row.isPaused) {
+        // Resume
         row.isPaused = false;
         if (pausedTimers[rowId]) {
             clearInterval(pausedTimers[rowId]);
@@ -665,6 +512,7 @@ function togglePause(rowId) {
             pauseBtn.className = 'btn-table btn-pause';
         }
     } else {
+        // Pause
         row.isPaused = true;
         row.pauseStartTime = Date.now();
         if (pauseBtn) {
@@ -707,6 +555,7 @@ function formatPausedTime(seconds) {
 // Delete row
 function deleteRow(rowId) {
     if (confirm('Delete this entry?')) {
+        // Clear pause timer
         if (pausedTimers[rowId]) {
             clearInterval(pausedTimers[rowId]);
             delete pausedTimers[rowId];
@@ -746,6 +595,7 @@ function renumberRows() {
 // Clear history
 function clearHistory() {
     if (confirm('Clear all history?')) {
+        // Clear all timers
         Object.keys(pausedTimers).forEach(key => {
             clearInterval(pausedTimers[key]);
             delete pausedTimers[key];
@@ -814,9 +664,6 @@ function saveData() {
 
 // Load data from localStorage
 function loadData() {
-    // Load config first
-    loadConfigFromLocalStorage();
-    
     try {
         const savedData = localStorage.getItem('journalData');
         if (savedData) {
@@ -824,10 +671,12 @@ function loadData() {
             rows = parsed.rows || [];
             rowCounter = parsed.rowCounter || 0;
             
+            // Render all rows
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
             rows.forEach(row => {
                 renderRow(row);
+                // Restart pause timers if needed
                 if (row.isPaused && !row.isStopped) {
                     startPauseTimer(row.id);
                 }
@@ -863,14 +712,12 @@ function updateStartTime(rowId) {
 // Auto-save on page unload
 window.addEventListener('beforeunload', () => {
     saveData();
-    saveConfigToLocalStorage();
 });
 
-// Handle visibility change
+// Handle visibility change to keep timers accurate
 document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
         saveData();
-        saveConfigToLocalStorage();
     } else {
         rows.forEach(row => {
             if (row.isPaused && !row.isStopped && row.pauseStartTime) {
