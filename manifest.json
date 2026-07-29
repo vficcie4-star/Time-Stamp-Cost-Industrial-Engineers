@@ -9,6 +9,8 @@
   "theme_color": "#2196F3",
   "categories": ["productivity", "business", "utilities"],
   "scope": "/journal-pwa/",
+  "prefer_related_applications": false,
+  "related_applications": [],
   "icons": [
     {
       "src": "icons/icon-192.png",
