@@ -21,7 +21,8 @@ let dragState = {
     isLongPress: false,
     touchId: null,
     dragOffsetX: 0,
-    dragOffsetY: 0
+    dragOffsetY: 0,
+    isDraggingFromTouch: false
 };
 
 // Initialize app
@@ -49,17 +50,24 @@ function setupDragAndDrop() {
     document.addEventListener('touchmove', onTouchMove, { passive: false });
     document.addEventListener('touchend', onTouchEnd, { passive: false });
     document.addEventListener('touchcancel', onTouchEnd, { passive: false });
+    
+    // Prevent default drag on images and links
+    document.addEventListener('dragstart', (e) => e.preventDefault());
 }
 
 // Touch start handler
 function onTouchStart(e) {
     const touch = e.touches[0];
     const target = e.target.closest('tr');
-    const dragHandle = e.target.closest('.drag-handle');
     
-    if (!target || !dragHandle) return;
+    if (!target) return;
     if (target.id === 'tableFooter') return;
     if (target.closest('#tableFooter')) return;
+    
+    // Don't start drag if clicking on button or input
+    if (e.target.closest('button') || e.target.closest('input') || e.target.closest('textarea')) {
+        return;
+    }
     
     const rowId = parseInt(target.dataset.id);
     if (isNaN(rowId)) return;
@@ -74,15 +82,20 @@ function onTouchStart(e) {
     dragState.sourceRow = target;
     dragState.sourceId = rowId;
     dragState.isLongPress = false;
+    dragState.isDraggingFromTouch = true;
     
-    // Start long press timer (600ms for mobile)
+    // Start long press timer (500ms for mobile)
     clearTimeout(dragState.longPressTimer);
     dragState.longPressTimer = setTimeout(() => {
         if (dragState.sourceRow) {
             dragState.isLongPress = true;
+            // Add haptic feedback if available
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
             startDragging(dragState.sourceRow, dragState.sourceId, touch.clientX, touch.clientY);
         }
-    }, 600);
+    }, 500);
 }
 
 // Touch move handler
@@ -131,21 +144,26 @@ function onTouchEnd(e) {
     dragState.startY = 0;
     dragState.isLongPress = false;
     dragState.touchId = null;
+    dragState.isDraggingFromTouch = false;
 }
 
 // Mouse down handler (desktop)
 function onDragStart(e) {
     const target = e.target.closest('tr');
-    const dragHandle = e.target.closest('.drag-handle');
     
-    if (!target || !dragHandle) return;
+    if (!target) return;
     if (target.id === 'tableFooter') return;
     if (target.closest('#tableFooter')) return;
+    
+    // Don't start drag if clicking on button or input
+    if (e.target.closest('button') || e.target.closest('input') || e.target.closest('textarea')) {
+        return;
+    }
     
     const rowId = parseInt(target.dataset.id);
     if (isNaN(rowId)) return;
     
-    // For desktop, start dragging immediately on mousedown on drag handle
+    // For desktop, start dragging immediately on mousedown
     const rect = target.getBoundingClientRect();
     dragState.startX = e.clientX;
     dragState.startY = e.clientY;
@@ -154,6 +172,7 @@ function onDragStart(e) {
     dragState.sourceRow = target;
     dragState.sourceId = rowId;
     dragState.isLongPress = true;
+    dragState.isDraggingFromTouch = false;
     
     startDragging(target, rowId, e.clientX, e.clientY);
     e.preventDefault();
@@ -251,10 +270,11 @@ function startDragging(row, rowId, x, y) {
     clone.style.backgroundColor = 'white';
     clone.style.left = (x - dragState.dragOffsetX) + 'px';
     clone.style.top = (y - dragState.dragOffsetY) + 'px';
+    clone.style.width = rect.width + 'px';
     clone.id = 'drag-clone';
     
     // Remove interactions from clone
-    clone.querySelectorAll('button, .drag-handle, .product-cell, .process-cell').forEach(el => {
+    clone.querySelectorAll('button, .product-cell, .process-cell').forEach(el => {
         el.style.pointerEvents = 'none';
         if (el.onclick) {
             el.onclick = null;
@@ -672,7 +692,8 @@ function renderRow(data) {
     tdNo.textContent = data.id;
     tdNo.style.fontWeight = '600';
     tdNo.style.textAlign = 'center';
-    tdNo.style.width = '40px';
+    tdNo.style.width = '30px';
+    tdNo.style.fontSize = '0.65rem';
     tr.appendChild(tdNo);
     
     // Product - Clickable to open form
@@ -680,7 +701,10 @@ function renderRow(data) {
     const productDiv = document.createElement('div');
     productDiv.className = 'product-cell' + (data.product ? '' : ' empty');
     productDiv.textContent = data.product || 'Tap to add';
-    productDiv.onclick = () => openFormModal(data.id);
+    productDiv.onclick = (e) => {
+        e.stopPropagation();
+        openFormModal(data.id);
+    };
     tdProduct.appendChild(productDiv);
     tr.appendChild(tdProduct);
     
@@ -689,7 +713,10 @@ function renderRow(data) {
     const processDiv = document.createElement('div');
     processDiv.className = 'process-cell' + (data.process ? '' : ' empty');
     processDiv.textContent = data.process || 'Tap to add';
-    processDiv.onclick = () => openFormModal(data.id);
+    processDiv.onclick = (e) => {
+        e.stopPropagation();
+        openFormModal(data.id);
+    };
     tdProcess.appendChild(processDiv);
     tr.appendChild(tdProcess);
     
@@ -709,7 +736,7 @@ function renderRow(data) {
     const endTimeContainer = document.createElement('div');
     endTimeContainer.style.display = 'flex';
     endTimeContainer.style.flexDirection = 'column';
-    endTimeContainer.style.gap = '3px';
+    endTimeContainer.style.gap = '2px';
     endTimeContainer.style.alignItems = 'center';
     
     const endTimeDisplay = document.createElement('span');
@@ -720,7 +747,7 @@ function renderRow(data) {
     
     const buttonContainer = document.createElement('div');
     buttonContainer.style.display = 'flex';
-    buttonContainer.style.gap = '3px';
+    buttonContainer.style.gap = '2px';
     buttonContainer.style.width = '100%';
     
     const stopBtn = document.createElement('button');
@@ -758,14 +785,6 @@ function renderRow(data) {
     const tdAction = document.createElement('td');
     const actionDiv = document.createElement('div');
     actionDiv.className = 'action-cell';
-    
-    // Drag handle
-    const dragHandle = document.createElement('div');
-    dragHandle.className = 'drag-handle';
-    dragHandle.textContent = '⋮⋮';
-    dragHandle.title = 'Drag to reorder';
-    dragHandle.setAttribute('aria-label', 'Drag to reorder');
-    actionDiv.appendChild(dragHandle);
     
     // Edit button
     const editBtn = document.createElement('button');
