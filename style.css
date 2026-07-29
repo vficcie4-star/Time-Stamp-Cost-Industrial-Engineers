@@ -14,18 +14,18 @@ body {
 
 .app-container {
     max-width: 100vw;
-    padding: 10px;
+    padding: 8px;
     margin: 0 auto;
-    padding-bottom: 80px;
+    padding-bottom: 60px;
 }
 
 /* Header Styles */
 .header {
     background: linear-gradient(135deg, #2196F3, #1976D2);
     color: white;
-    padding: 15px;
-    border-radius: 12px;
-    margin-bottom: 15px;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 10px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
@@ -33,18 +33,18 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 5px;
+    gap: 3px;
 }
 
 .current-time {
-    font-size: 2.5rem;
+    font-size: 2.2rem;
     font-weight: 700;
     letter-spacing: 2px;
     text-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .current-date {
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: 500;
     opacity: 0.9;
 }
@@ -52,18 +52,18 @@ body {
 /* Action Buttons */
 .action-buttons {
     display: flex;
-    gap: 8px;
-    margin-bottom: 15px;
+    gap: 6px;
+    margin-bottom: 10px;
     flex-wrap: wrap;
 }
 
 .btn {
     flex: 1;
-    min-width: 80px;
-    padding: 12px 8px;
+    min-width: 60px;
+    padding: 8px 6px;
     border: none;
-    border-radius: 8px;
-    font-size: 0.9rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -88,9 +88,13 @@ body {
     background: #4CAF50;
 }
 
+.btn-warning {
+    background: #FF9800;
+}
+
 .btn-sm {
-    padding: 8px 16px;
-    font-size: 0.8rem;
+    padding: 6px 12px;
+    font-size: 0.7rem;
     min-width: auto;
     flex: none;
 }
@@ -98,7 +102,7 @@ body {
 /* Table Styles */
 .table-container {
     background: white;
-    border-radius: 12px;
+    border-radius: 10px;
     overflow-x: auto;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     -webkit-overflow-scrolling: touch;
@@ -107,8 +111,8 @@ body {
 #journalTable {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.75rem;
-    min-width: 600px;
+    font-size: 0.7rem;
+    min-width: 500px;
 }
 
 #journalTable thead {
@@ -117,24 +121,33 @@ body {
 }
 
 #journalTable th {
-    padding: 10px 8px;
+    padding: 6px 4px;
     text-align: left;
     font-weight: 600;
     white-space: nowrap;
     position: sticky;
     top: 0;
     z-index: 10;
-    font-size: 0.7rem;
+    font-size: 0.6rem;
 }
 
 #journalTable td {
-    padding: 8px 6px;
+    padding: 4px 3px;
     border-bottom: 1px solid #e0e0e0;
     vertical-align: middle;
 }
 
+#journalTable tbody tr {
+    transition: background 0.2s;
+    cursor: grab;
+}
+
+#journalTable tbody tr:active {
+    cursor: grabbing;
+}
+
 #journalTable tbody tr:hover {
-    background: #f5f5f5;
+    background: #f8f9fa;
 }
 
 /* Product and Process cells */
@@ -142,13 +155,14 @@ body {
     font-weight: 500;
     color: #1976D2;
     cursor: pointer;
-    padding: 4px 6px;
-    border-radius: 4px;
+    padding: 3px 4px;
+    border-radius: 3px;
     transition: background 0.2s;
-    max-width: 100px;
+    max-width: 80px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-size: 0.65rem;
 }
 
 .product-cell:hover {
@@ -161,14 +175,15 @@ body {
 
 .process-cell {
     cursor: pointer;
-    padding: 4px 6px;
-    border-radius: 4px;
+    padding: 3px 4px;
+    border-radius: 3px;
     transition: background 0.2s;
-    max-width: 150px;
+    max-width: 100px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     color: #333;
+    font-size: 0.65rem;
 }
 
 .process-cell:hover {
@@ -189,29 +204,29 @@ body {
 .time-display {
     font-family: 'Courier New', monospace;
     font-weight: 600;
-    font-size: 0.7rem;
-    padding: 4px 6px;
+    font-size: 0.6rem;
+    padding: 2px 4px;
     background: #f5f5f5;
-    border-radius: 4px;
+    border-radius: 3px;
     white-space: nowrap;
     display: inline-block;
-    min-width: 70px;
+    min-width: 55px;
     text-align: center;
 }
 
 /* Buttons in table */
 .btn-table {
-    padding: 4px 8px;
+    padding: 2px 5px;
     border: none;
-    border-radius: 4px;
-    font-size: 0.6rem;
+    border-radius: 3px;
+    font-size: 0.5rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
     color: white;
     margin: 1px 0;
     width: 100%;
-    min-width: 40px;
+    min-width: 30px;
 }
 
 .btn-table:active {
@@ -232,8 +247,8 @@ body {
 
 .btn-edit {
     background: #2196F3;
-    padding: 4px 6px;
-    font-size: 0.55rem;
+    padding: 2px 4px;
+    font-size: 0.5rem;
 }
 
 /* Delete button */
@@ -242,9 +257,9 @@ body {
     color: white;
     border: none;
     border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    font-size: 0.7rem;
+    width: 20px;
+    height: 20px;
+    font-size: 0.6rem;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -262,48 +277,43 @@ body {
 .paused-display {
     font-family: 'Courier New', monospace;
     font-weight: 600;
-    font-size: 0.65rem;
+    font-size: 0.55rem;
     text-align: center;
     background: #FFF3E0;
-    padding: 2px 6px;
-    border-radius: 4px;
+    padding: 2px 4px;
+    border-radius: 3px;
     display: inline-block;
-    min-width: 60px;
+    min-width: 50px;
 }
 
 /* Action column */
 .action-cell {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 2px;
     align-items: center;
 }
 
 .action-cell .btn-table {
     width: 100%;
-    min-width: 50px;
+    min-width: 30px;
 }
 
 /* Add button at bottom */
 .add-bottom-btn {
     width: 100%;
-    padding: 14px;
-    font-size: 1rem;
+    padding: 10px;
+    font-size: 0.85rem;
     font-weight: 700;
     background: linear-gradient(135deg, #2196F3, #1976D2);
     border: none;
-    border-radius: 8px;
+    border-radius: 6px;
     color: white;
     cursor: pointer;
     transition: all 0.3s ease;
     text-transform: uppercase;
     letter-spacing: 1px;
     box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
-}
-
-.add-bottom-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
 }
 
 .add-bottom-btn:active {
@@ -315,40 +325,89 @@ body {
 }
 
 #tableFooter td {
-    padding: 10px !important;
+    padding: 8px !important;
     border-top: 2px solid #e0e0e0;
+}
+
+/* Drag and Drop Styles */
+#tableBody tr {
+    transition: transform 0.2s ease;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+#tableBody tr.dragging {
+    opacity: 0.4;
+    transform: scale(0.97);
+}
+
+#tableBody tr.drag-over {
+    border-bottom: 3px solid #2196F3;
+    background: #e3f2fd;
+}
+
+#tableBody tr.drag-over-top {
+    border-top: 3px solid #2196F3;
+    border-bottom: none;
+    background: #e3f2fd;
+}
+
+#tableBody tr.drag-source {
+    opacity: 0.3;
+}
+
+/* Drag indicator animation */
+.drag-indicator {
+    display: none;
+    position: fixed;
+    pointer-events: none;
+    font-size: 1.5rem;
+    color: #2196F3;
+    opacity: 0.7;
+    z-index: 999;
+    transform: translate(-50%, -50%);
+}
+
+.drag-indicator.active {
+    display: block;
+    animation: pulse 0.8s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
 }
 
 /* Form Modal */
 .form-modal {
-    max-width: 500px;
+    max-width: 450px;
     max-height: 95vh;
 }
 
 .entry-form {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
 }
 
 .form-group {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 3px;
 }
 
 .form-group label {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: #555;
 }
 
 .form-group input,
 .form-group textarea {
-    padding: 10px 12px;
+    padding: 8px 10px;
     border: 2px solid #e0e0e0;
-    border-radius: 8px;
-    font-size: 0.95rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
     font-family: inherit;
     transition: border-color 0.3s;
     width: 100%;
@@ -363,7 +422,7 @@ body {
 
 .form-group textarea {
     resize: vertical;
-    min-height: 60px;
+    min-height: 50px;
 }
 
 /* Modal Styles */
@@ -384,14 +443,14 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: 15px;
 }
 
 .modal-content {
     background: white;
-    border-radius: 16px;
+    border-radius: 14px;
     width: 100%;
-    max-width: 500px;
+    max-width: 450px;
     max-height: 90vh;
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     animation: slideUp 0.3s ease-out;
@@ -400,17 +459,17 @@ body {
 }
 
 .modal-header {
-    padding: 20px 24px 16px;
+    padding: 16px 20px 12px;
     border-bottom: 1px solid #e0e0e0;
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 8px;
 }
 
 .modal-header h3 {
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 600;
     color: #333;
     margin: 0;
@@ -418,13 +477,92 @@ body {
 
 .modal-actions {
     display: flex;
-    gap: 8px;
+    gap: 6px;
 }
 
 .modal-body {
-    padding: 20px 24px;
+    padding: 16px 20px;
     flex: 1;
     overflow-y: auto;
+}
+
+/* Notes Modal */
+.notes-modal {
+    max-width: 550px;
+    max-height: 95vh;
+}
+
+.notes-info {
+    padding: 6px 0 10px 0;
+    color: #666;
+    font-size: 0.75rem;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 10px;
+}
+
+#notesTextArea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    resize: vertical;
+    transition: border-color 0.3s;
+    min-height: 250px;
+    line-height: 1.8;
+    background: #fafafa;
+}
+
+#notesTextArea:focus {
+    outline: none;
+    border-color: #FF9800;
+    box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
+    background: white;
+}
+
+.notes-word-count {
+    padding: 8px 0 4px 0;
+    color: #888;
+    font-size: 0.7rem;
+    text-align: right;
+    border-top: 1px solid #eee;
+    margin-top: 10px;
+}
+
+/* Autocomplete Suggestions */
+.suggestions-list {
+    display: none;
+    position: relative;
+    background: white;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    max-height: 120px;
+    overflow-y: auto;
+    z-index: 100;
+    margin-top: -2px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.suggestions-list.active {
+    display: block;
+}
+
+.suggestion-item {
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 0.8rem;
+}
+
+.suggestion-item:hover {
+    background: #e3f2fd;
+}
+
+.suggestion-item .match-highlight {
+    font-weight: 700;
+    color: #1976D2;
 }
 
 /* Animations */
@@ -447,157 +585,70 @@ body {
 /* Responsive Design */
 @media (max-width: 768px) {
     .app-container {
-        padding: 5px;
-        padding-bottom: 60px;
+        padding: 4px;
+        padding-bottom: 50px;
     }
 
     .current-time {
-        font-size: 2rem;
-    }
-
-    .action-buttons {
-        gap: 5px;
+        font-size: 1.8rem;
     }
 
     .btn {
-        font-size: 0.7rem;
-        padding: 10px 5px;
-        min-width: 60px;
+        font-size: 0.65rem;
+        padding: 8px 4px;
+        min-width: 50px;
     }
 
     #journalTable {
-        font-size: 0.65rem;
-        min-width: 500px;
+        font-size: 0.6rem;
+        min-width: 420px;
     }
 
     #journalTable th {
-        font-size: 0.6rem;
-        padding: 8px 4px;
+        font-size: 0.55rem;
+        padding: 5px 3px;
     }
 
     #journalTable td {
-        padding: 6px 4px;
+        padding: 3px 2px;
     }
 
     .product-cell {
-        max-width: 70px;
+        max-width: 60px;
         font-size: 0.6rem;
     }
 
     .process-cell {
-        max-width: 100px;
+        max-width: 70px;
         font-size: 0.6rem;
     }
 
     .time-display {
-        font-size: 0.6rem;
-        min-width: 60px;
-        padding: 2px 4px;
+        font-size: 0.55rem;
+        min-width: 50px;
+        padding: 2px 3px;
     }
 
     .btn-table {
-        font-size: 0.5rem;
-        padding: 3px 5px;
-        min-width: 35px;
+        font-size: 0.45rem;
+        padding: 2px 4px;
+        min-width: 28px;
     }
 
     .delete-btn {
-        width: 20px;
-        height: 20px;
-        font-size: 0.6rem;
-    }
-
-    .paused-display {
+        width: 18px;
+        height: 18px;
         font-size: 0.55rem;
-        min-width: 50px;
-    }
-
-    .modal-content {
-        max-width: 100%;
-        margin: 10px;
-        max-height: 95vh;
-    }
-
-    .modal-header {
-        padding: 16px 20px 12px;
-    }
-
-    .modal-body {
-        padding: 16px 20px;
-    }
-
-    .modal-header h3 {
-        font-size: 1rem;
-    }
-
-    .btn-sm {
-        padding: 6px 12px;
-        font-size: 0.7rem;
-    }
-
-    .form-group input,
-    .form-group textarea {
-        font-size: 0.9rem;
-        padding: 8px 10px;
-    }
-
-    .form-group label {
-        font-size: 0.75rem;
-    }
-
-    .add-bottom-btn {
-        padding: 14px;
-        font-size: 0.85rem;
-    }
-
-    .action-cell {
-        gap: 2px;
-    }
-}
-
-@media (max-width: 480px) {
-    .current-time {
-        font-size: 1.6rem;
-    }
-
-    .btn {
-        font-size: 0.6rem;
-        padding: 8px 4px;
-        min-width: 50px;
-    }
-
-    #journalTable {
-        font-size: 0.55rem;
-        min-width: 400px;
-    }
-
-    #journalTable th {
-        font-size: 0.5rem;
-        padding: 6px 3px;
-    }
-
-    #journalTable td {
-        padding: 4px 3px;
-    }
-
-    .product-cell {
-        max-width: 50px;
-        font-size: 0.55rem;
-    }
-
-    .process-cell {
-        max-width: 70px;
-        font-size: 0.55rem;
-    }
-
-    .time-display {
-        font-size: 0.5rem;
-        min-width: 50px;
     }
 
     .paused-display {
         font-size: 0.5rem;
         min-width: 45px;
+    }
+
+    .modal-content {
+        max-width: 100%;
+        margin: 10px;
     }
 
     .modal-header {
@@ -615,120 +666,98 @@ body {
     }
 
     .add-bottom-btn {
-        padding: 12px;
+        padding: 10px;
         font-size: 0.75rem;
     }
-}
 
-/* Scrollbar Styling */
-.table-container::-webkit-scrollbar {
-    height: 6px;
-}
-
-.table-container::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-}
-
-.table-container::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 3px;
-}
-
-.table-container::-webkit-scrollbar-thumb:hover {
-    background: #555;
-}
-
-.modal-body::-webkit-scrollbar {
-    width: 6px;
-}
-
-.modal-body::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-}
-
-.modal-body::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 3px;
-}
-/* Autocomplete Suggestions */
-.suggestions-list {
-    display: none;
-    position: relative;
-    background: white;
-    border: 1px solid #ddd;
-    border-top: none;
-    border-radius: 0 0 8px 8px;
-    max-height: 150px;
-    overflow-y: auto;
-    z-index: 100;
-    margin-top: -2px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.suggestions-list.active {
-    display: block;
-}
-
-.suggestion-item {
-    padding: 8px 12px;
-    cursor: pointer;
-    transition: background 0.2s;
-    font-size: 0.9rem;
-}
-
-.suggestion-item:hover {
-    background: #e3f2fd;
-}
-
-.suggestion-item:active {
-    background: #bbdefb;
-}
-
-.suggestion-item.highlighted {
-    background: #e3f2fd;
-}
-
-.suggestion-item .match-highlight {
-    font-weight: 700;
-    color: #1976D2;
-}
-
-/* Form group with suggestions */
-.form-group {
-    position: relative;
-}
-
-.form-group input:focus + .suggestions-list,
-.form-group input:focus ~ .suggestions-list {
-    display: block;
-}
-
-/* Responsive suggestions */
-@media (max-width: 768px) {
-    .suggestions-list {
-        max-height: 120px;
-    }
-    
-    .suggestion-item {
-        padding: 10px 12px;
+    #notesTextArea {
+        min-height: 200px;
         font-size: 0.85rem;
     }
 }
 
 @media (max-width: 480px) {
-    .suggestions-list {
-        max-height: 100px;
+    .current-time {
+        font-size: 1.5rem;
     }
-    
-    .suggestion-item {
-        padding: 12px 12px;
+
+    .btn {
+        font-size: 0.55rem;
+        padding: 6px 3px;
+        min-width: 40px;
+    }
+
+    #journalTable {
+        font-size: 0.55rem;
+        min-width: 360px;
+    }
+
+    #journalTable th {
+        font-size: 0.5rem;
+        padding: 4px 2px;
+    }
+
+    #journalTable td {
+        padding: 2px 2px;
+    }
+
+    .product-cell {
+        max-width: 45px;
+        font-size: 0.55rem;
+    }
+
+    .process-cell {
+        max-width: 55px;
+        font-size: 0.55rem;
+    }
+
+    .time-display {
+        font-size: 0.5rem;
+        min-width: 42px;
+    }
+
+    .paused-display {
+        font-size: 0.45rem;
+        min-width: 38px;
+    }
+
+    .modal-header h3 {
+        font-size: 0.9rem;
+    }
+
+    .btn-sm {
+        padding: 4px 10px;
+        font-size: 0.65rem;
+    }
+
+    .form-group input,
+    .form-group textarea {
         font-size: 0.8rem;
+        padding: 5px 6px;
+    }
+
+    #notesTextArea {
+        min-height: 150px;
+        font-size: 0.8rem;
+        padding: 10px;
     }
 }
 
-/* Suggestions list scrollbar */
+/* Scrollbar Styling */
+.table-container::-webkit-scrollbar {
+    height: 4px;
+}
+
+.table-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 2px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 2px;
+}
+
 .suggestions-list::-webkit-scrollbar {
     width: 4px;
 }
@@ -742,209 +771,17 @@ body {
     background: #888;
     border-radius: 2px;
 }
-/* Notes Modal */
-.notes-modal {
-    max-width: 600px;
-    max-height: 95vh;
+
+.modal-body::-webkit-scrollbar {
+    width: 4px;
 }
 
-.notes-info {
-    padding: 8px 0 12px 0;
-    color: #666;
-    font-size: 0.85rem;
-    border-bottom: 1px solid #eee;
-    margin-bottom: 12px;
+.modal-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 2px;
 }
 
-.notes-info small {
-    font-weight: 400;
-}
-
-#notesTextArea {
-    width: 100%;
-    padding: 14px;
-    border: 2px solid #e0e0e0;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-family: inherit;
-    resize: vertical;
-    transition: border-color 0.3s;
-    min-height: 300px;
-    line-height: 1.8;
-    background: #fafafa;
-}
-
-#notesTextArea:focus {
-    outline: none;
-    border-color: #FF9800;
-    box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
-    background: white;
-}
-
-.notes-word-count {
-    padding: 10px 0 5px 0;
-    color: #888;
-    font-size: 0.8rem;
-    text-align: right;
-    border-top: 1px solid #eee;
-    margin-top: 12px;
-}
-
-.notes-word-count span {
-    font-weight: 600;
-    color: #555;
-}
-
-/* Notes button color */
-.btn-warning {
-    background: #FF9800;
-}
-
-.btn-warning:hover {
-    background: #F57C00;
-}
-
-.btn-warning:active {
-    background: #E65100;
-}
-
-/* Responsive notes */
-@media (max-width: 768px) {
-    .notes-modal {
-        max-width: 100%;
-        margin: 10px;
-    }
-    
-    #notesTextArea {
-        min-height: 250px;
-        font-size: 0.95rem;
-        padding: 12px;
-    }
-    
-    .notes-info {
-        font-size: 0.75rem;
-    }
-    
-    .notes-word-count {
-        font-size: 0.7rem;
-    }
-}
-
-@media (max-width: 480px) {
-    #notesTextArea {
-        min-height: 200px;
-        font-size: 0.9rem;
-        padding: 10px;
-    }
-    
-    .notes-info {
-        font-size: 0.7rem;
-    }
-    
-    .notes-word-count {
-        font-size: 0.65rem;
-    }
-}
-/* Drag and Drop Styles */
-.drag-handle {
-    cursor: grab;
-    padding: 4px 6px;
-    font-size: 1.2rem;
-    color: #999;
-    user-select: none;
-    -webkit-user-select: none;
-    touch-action: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: color 0.2s;
-}
-
-.drag-handle:hover {
-    color: #666;
-}
-
-.drag-handle:active {
-    cursor: grabbing;
-    color: #2196F3;
-}
-
-/* Row dragging states */
-#tableBody tr {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-#tableBody tr.dragging {
-    opacity: 0.5;
-    transform: scale(0.98);
-    background: #e3f2fd;
-}
-
-#tableBody tr.drag-over {
-    border-bottom: 3px solid #2196F3;
-    background: #f5f5f5;
-}
-
-#tableBody tr.drag-over-top {
-    border-top: 3px solid #2196F3;
-    border-bottom: none;
-}
-
-#tableBody tr.drag-source {
-    opacity: 0.3;
-}
-
-/* Drag indicator animation */
-.drag-indicator {
-    display: none;
-    position: fixed;
-    pointer-events: none;
-    font-size: 2rem;
-    color: #2196F3;
-    opacity: 0.7;
-    z-index: 999;
-    transform: translate(-50%, -50%);
-}
-
-.drag-indicator.active {
-    display: block;
-    animation: pulse 0.8s ease-in-out infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
-    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
-}
-
-/* Responsive drag handle */
-@media (max-width: 768px) {
-    .drag-handle {
-        font-size: 1rem;
-        padding: 6px 4px;
-    }
-}
-
-@media (max-width: 480px) {
-    .drag-handle {
-        font-size: 0.9rem;
-        padding: 8px 3px;
-    }
-}
-
-/* Touch feedback for drag */
-#tableBody tr:active {
-    touch-action: none;
-}
-
-/* Drag handle in action column */
-.action-cell {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    align-items: center;
-}
-
-.action-cell .drag-handle {
-    order: -1;
-    margin-bottom: 2px;
+.modal-body::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 2px;
 }
