@@ -652,26 +652,19 @@ body {
     background: #888;
     border-radius: 3px;
 }
-/* Autocomplete styles */
-.autocomplete-wrapper {
-    position: relative;
-    width: 100%;
-}
-
+/* Autocomplete Suggestions */
 .suggestions-list {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
+    display: none;
+    position: relative;
     background: white;
-    border: 2px solid #e0e0e0;
+    border: 1px solid #ddd;
     border-top: none;
     border-radius: 0 0 8px 8px;
-    max-height: 200px;
+    max-height: 150px;
     overflow-y: auto;
     z-index: 100;
-    display: none;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin-top: -2px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 .suggestions-list.active {
@@ -679,11 +672,10 @@ body {
 }
 
 .suggestion-item {
-    padding: 10px 12px;
+    padding: 8px 12px;
     cursor: pointer;
     transition: background 0.2s;
     font-size: 0.9rem;
-    border-bottom: 1px solid #f5f5f5;
 }
 
 .suggestion-item:hover {
@@ -694,144 +686,59 @@ body {
     background: #bbdefb;
 }
 
-.suggestion-item:last-child {
-    border-bottom: none;
+.suggestion-item.highlighted {
+    background: #e3f2fd;
 }
 
-.suggestion-item .highlight {
-    font-weight: 600;
+.suggestion-item .match-highlight {
+    font-weight: 700;
     color: #1976D2;
 }
 
-.suggestion-item .suggestion-label {
-    font-size: 0.7rem;
-    color: #999;
-    margin-left: 8px;
+/* Form group with suggestions */
+.form-group {
+    position: relative;
 }
 
-/* Manage Lists Modal */
-.manage-lists-container {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
+.form-group input:focus + .suggestions-list,
+.form-group input:focus ~ .suggestions-list {
+    display: block;
 }
 
-.list-management {
-    background: #f8f9fa;
-    border-radius: 8px;
-    padding: 16px;
-}
-
-.list-management h4 {
-    margin: 0 0 12px 0;
-    color: #1976D2;
-    font-size: 0.95rem;
-}
-
-.list-items {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-bottom: 12px;
-    max-height: 200px;
-    overflow-y: auto;
-    padding: 4px;
-}
-
-.list-item-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: white;
-    padding: 4px 10px 4px 14px;
-    border-radius: 20px;
-    border: 1px solid #e0e0e0;
-    font-size: 0.8rem;
-    transition: all 0.2s;
-    cursor: default;
-}
-
-.list-item-tag:hover {
-    border-color: #f44336;
-    background: #fff5f5;
-}
-
-.list-item-tag .remove-item {
-    background: none;
-    border: none;
-    color: #999;
-    cursor: pointer;
-    font-size: 0.9rem;
-    padding: 0 2px;
-    transition: color 0.2s;
-    line-height: 1;
-}
-
-.list-item-tag .remove-item:hover {
-    color: #f44336;
-}
-
-.add-item-row {
-    display: flex;
-    gap: 6px;
-}
-
-.add-item-row input {
-    flex: 1;
-    padding: 8px 10px;
-    border: 2px solid #e0e0e0;
-    border-radius: 6px;
-    font-size: 0.85rem;
-}
-
-.add-item-row input:focus {
-    outline: none;
-    border-color: #2196F3;
-}
-
-.add-item-row .btn {
-    padding: 8px 16px;
-    min-width: 40px;
-    flex: none;
-}
-
-/* Scrollable lists */
-.list-items::-webkit-scrollbar {
-    width: 6px;
-}
-
-.list-items::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-}
-
-.list-items::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 3px;
-}
-
-.list-items::-webkit-scrollbar-thumb:hover {
-    background: #aaa;
-}
-
-/* Mobile adjustments for list management */
+/* Responsive suggestions */
 @media (max-width: 768px) {
-    .list-management {
-        padding: 12px;
+    .suggestions-list {
+        max-height: 120px;
     }
     
-    .list-item-tag {
-        font-size: 0.75rem;
-        padding: 3px 8px 3px 12px;
+    .suggestion-item {
+        padding: 10px 12px;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .suggestions-list {
+        max-height: 100px;
     }
     
-    .add-item-row input {
+    .suggestion-item {
+        padding: 12px 12px;
         font-size: 0.8rem;
-        padding: 6px 8px;
     }
-    
-    .add-item-row .btn {
-        padding: 6px 12px;
-        font-size: 0.8rem;
-    }
+}
+
+/* Suggestions list scrollbar */
+.suggestions-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.suggestions-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 2px;
+}
+
+.suggestions-list::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 2px;
 }
