@@ -726,3 +726,122 @@ document.addEventListener('visibilitychange', () => {
         });
     }
 });
+// Fullscreen functionality
+function setupFullscreen() {
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    
+    if (!fullscreenBtn) return;
+    
+    // Check if we're already in fullscreen
+    const isFullscreen = document.fullscreenElement || 
+                        document.webkitFullscreenElement || 
+                        document.mozFullScreenElement;
+    
+    // Update button icon based on state
+    function updateButtonIcon() {
+        const isFS = document.fullscreenElement || 
+                    document.webkitFullscreenElement || 
+                    document.mozFullScreenElement;
+        fullscreenBtn.textContent = isFS ? '⛶' : '⛶';
+        fullscreenBtn.title = isFS ? 'Exit Fullscreen' : 'Enter Fullscreen';
+    }
+    
+    // Toggle fullscreen
+    fullscreenBtn.addEventListener('click', function() {
+        const isFS = document.fullscreenElement || 
+                    document.webkitFullscreenElement || 
+                    document.mozFullScreenElement;
+        
+        if (isFS) {
+            // Exit fullscreen
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+            }
+        } else {
+            // Enter fullscreen
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+            } else if (elem.mozRequestFullScreen) {
+                elem.mozRequestFullScreen();
+            } else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen();
+            }
+        }
+    });
+    
+    // Update button on fullscreen change
+    document.addEventListener('fullscreenchange', updateButtonIcon);
+    document.addEventListener('webkitfullscreenchange', updateButtonIcon);
+    document.addEventListener('mozfullscreenchange', updateButtonIcon);
+    document.addEventListener('MSFullscreenChange', updateButtonIcon);
+    
+    // Auto-enter fullscreen on mobile if not in standalone mode
+    if (window.innerWidth <= 768 && !window.matchMedia('(display-mode: standalone)').matches) {
+        // Don't auto-enter, let user click the button
+        // But show a subtle hint
+        setTimeout(() => {
+            fullscreenBtn.style.animation = 'pulse 2s ease-in-out 3';
+        }, 1000);
+    }
+}
+
+// Add pulse animation for fullscreen button
+const styleSheet = document.createElement("style");
+styleSheet.textContent = `
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.2); box-shadow: 0 0 20px rgba(33, 150, 243, 0.5); }
+        100% { transform: scale(1); }
+    }
+`;
+document.head.appendChild(styleSheet);
+
+// Call setupFullscreen in DOMContentLoaded
+// Add this to your existing DOMContentLoaded event listener
+document.addEventListener('DOMContentLoaded', () => {
+    loadData();
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+    setupEventListeners();
+    setupAutocomplete();
+    setupFullscreen(); // Add this line
+});
+
+// Also handle fullscreen on orientation change
+window.addEventListener('orientationchange', () => {
+    // If in fullscreen, keep it
+    const isFS = document.fullscreenElement || 
+                document.webkitFullscreenElement || 
+                document.mozFullScreenElement;
+    if (isFS) {
+        // Re-apply fullscreen if needed
+        setTimeout(() => {
+            const elem = document.documentElement;
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen();
+                } else if (elem.webkitRequestFullscreen) {
+                    elem.webkitRequestFullscreen();
+                }
+            }
+        }, 100);
+    }
+});
+
+// Handle resize for fullscreen optimizations
+window.addEventListener('resize', () => {
+    const isFS = document.fullscreenElement || 
+                document.webkitFullscreenElement || 
+                document.mozFullScreenElement;
+    if (isFS) {
+        // Adjust UI for fullscreen
+        document.querySelector('.app-container').style.maxWidth = '100vw';
+    }
+});
