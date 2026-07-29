@@ -12,8 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(updateDateTime, 1000);
     setupEventListeners();
     setupAutocomplete();
-    setupFullscreen();
-    setupFullscreenHint();
 });
 
 // Setup event listeners
@@ -33,12 +31,6 @@ function setupEventListeners() {
         }
     });
     
-    // Close hint
-    document.querySelector('.hint-close')?.addEventListener('click', () => {
-        document.getElementById('fullscreenHint').classList.remove('show');
-        localStorage.setItem('hideFullscreenHint', 'true');
-    });
-    
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && document.getElementById('formModal').classList.contains('active')) {
@@ -47,7 +39,6 @@ function setupEventListeners() {
         if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && document.getElementById('formModal').classList.contains('active')) {
             saveFormData();
         }
-        // F11 for fullscreen (browser default)
     });
 }
 
@@ -225,6 +216,8 @@ function addNewRow() {
             newRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     }, 200);
+    
+    // DO NOT auto-open form - user will click to edit
 }
 
 // Render a single row (compact view)
@@ -716,88 +709,10 @@ function updateStartTime(rowId) {
     }
 }
 
-// Fullscreen functionality
-function setupFullscreen() {
-    const fullscreenBtn = document.getElementById('fullscreenBtn');
-    
-    if (!fullscreenBtn) return;
-    
-    // Check if we're already in fullscreen
-    const isFullscreen = document.fullscreenElement || 
-                        document.webkitFullscreenElement || 
-                        document.mozFullScreenElement;
-    
-    // Update button icon based on state
-    function updateButtonIcon() {
-        const isFS = document.fullscreenElement || 
-                    document.webkitFullscreenElement || 
-                    document.mozFullScreenElement;
-        fullscreenBtn.textContent = isFS ? '⛶' : '⛶';
-        fullscreenBtn.title = isFS ? 'Exit Fullscreen' : 'Enter Fullscreen';
-        fullscreenBtn.style.background = isFS ? 'rgba(76, 175, 80, 0.95)' : 'rgba(255, 255, 255, 0.95)';
-        fullscreenBtn.style.borderColor = isFS ? '#4CAF50' : '#ddd';
-    }
-    
-    // Toggle fullscreen
-    fullscreenBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        const isFS = document.fullscreenElement || 
-                    document.webkitFullscreenElement || 
-                    document.mozFullScreenElement;
-        
-        if (isFS) {
-            // Exit fullscreen
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            } else if (document.webkitExitFullscreen) {
-                document.webkitExitFullscreen();
-            } else if (document.mozCancelFullScreen) {
-                document.mozCancelFullScreen();
-            }
-        } else {
-            // Enter fullscreen
-            const elem = document.documentElement;
-            if (elem.requestFullscreen) {
-                elem.requestFullscreen();
-            } else if (elem.webkitRequestFullscreen) {
-                elem.webkitRequestFullscreen();
-            } else if (elem.mozRequestFullScreen) {
-                elem.mozRequestFullScreen();
-            } else if (elem.msRequestFullscreen) {
-                elem.msRequestFullscreen();
-            }
-        }
-    });
-    
-    // Update button on fullscreen change
-    document.addEventListener('fullscreenchange', updateButtonIcon);
-    document.addEventListener('webkitfullscreenchange', updateButtonIcon);
-    document.addEventListener('mozfullscreenchange', updateButtonIcon);
-    document.addEventListener('MSFullscreenChange', updateButtonIcon);
-    
-    // Initial update
-    updateButtonIcon();
-}
-
-// Setup fullscreen hint for mobile
-function setupFullscreenHint() {
-    // Only show on mobile and if not in standalone mode
-    const isMobile = window.innerWidth <= 768;
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
-                        window.matchMedia('(display-mode: fullscreen)').matches;
-    const hintHidden = localStorage.getItem('hideFullscreenHint') === 'true';
-    
-    if (isMobile && !isStandalone && !hintHidden) {
-        setTimeout(() => {
-            document.getElementById('fullscreenHint').classList.add('show');
-            
-            // Auto-hide after 5 seconds
-            setTimeout(() => {
-                document.getElementById('fullscreenHint').classList.remove('show');
-            }, 5000);
-        }, 2000);
-    }
-}
+// Auto-save on page unload
+window.addEventListener('beforeunload', () => {
+    saveData();
+});
 
 // Handle visibility change to keep timers accurate
 document.addEventListener('visibilitychange', () => {
@@ -810,44 +725,4 @@ document.addEventListener('visibilitychange', () => {
             }
         });
     }
-});
-
-// Handle orientation change
-window.addEventListener('orientationchange', () => {
-    // If in fullscreen, keep it
-    const isFS = document.fullscreenElement || 
-                document.webkitFullscreenElement || 
-                document.mozFullScreenElement;
-    if (isFS) {
-        // Re-apply fullscreen if needed
-        setTimeout(() => {
-            const elem = document.documentElement;
-            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-                if (elem.requestFullscreen) {
-                    elem.requestFullscreen();
-                } else if (elem.webkitRequestFullscreen) {
-                    elem.webkitRequestFullscreen();
-                }
-            }
-        }, 100);
-    }
-});
-
-// Handle resize for fullscreen optimizations
-window.addEventListener('resize', () => {
-    const isFS = document.fullscreenElement || 
-                document.webkitFullscreenElement || 
-                document.mozFullScreenElement;
-    if (isFS) {
-        // Adjust UI for fullscreen
-        const container = document.querySelector('.app-container');
-        if (container) {
-            container.style.maxWidth = '100vw';
-        }
-    }
-});
-
-// Auto-save on page unload
-window.addEventListener('beforeunload', () => {
-    saveData();
 });
