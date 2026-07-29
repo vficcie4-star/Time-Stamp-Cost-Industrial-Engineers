@@ -4,6 +4,8 @@ let rows = [];
 let pausedTimers = {};
 let currentTimeInterval = null;
 let editingRowId = null; // Track which row is being edited
+let notes = ''; // Store notes content
+let notesLastSaved = null; // Track last save time
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
@@ -12,17 +14,23 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(updateDateTime, 1000);
     setupEventListeners();
     setupAutocomplete();
+    updateWordCount();
 });
 
 // Setup event listeners
 function setupEventListeners() {
     document.getElementById('addRowBtn').addEventListener('click', addNewRow);
     document.getElementById('clearHistoryBtn').addEventListener('click', clearHistory);
+    document.getElementById('notesBtn').addEventListener('click', openNotesModal);
     document.getElementById('exportCSVBtn').addEventListener('click', exportCSV);
     
     // Form modal event listeners
     document.getElementById('formCancelBtn').addEventListener('click', closeFormModal);
     document.getElementById('formSaveBtn').addEventListener('click', saveFormData);
+    
+    // Notes modal event listeners
+    document.getElementById('notesCancelBtn').addEventListener('click', closeNotesModal);
+    document.getElementById('notesSaveBtn').addEventListener('click', saveNotes);
     
     // Close modal on backdrop click
     document.getElementById('formModal').addEventListener('click', (e) => {
@@ -31,15 +39,109 @@ function setupEventListeners() {
         }
     });
     
-    // Keyboard shortcuts
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && document.getElementById('formModal').classList.contains('active')) {
-            closeFormModal();
-        }
-        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && document.getElementById('formModal').classList.contains('active')) {
-            saveFormData();
+    document.getElementById('notesModal').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) {
+            closeNotesModal();
         }
     });
+    
+    // Notes text area word count
+    document.getElementById('notesTextArea').addEventListener('input', updateWordCount);
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            if (document.getElementById('formModal').classList.contains('active')) {
+                closeFormModal();
+            }
+            if (document.getElementById('notesModal').classList.contains('active')) {
+                closeNotesModal();
+            }
+        }
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+            if (document.getElementById('formModal').classList.contains('active')) {
+                saveFormData();
+            }
+            if (document.getElementById('notesModal').classList.contains('active')) {
+                saveNotes();
+            }
+        }
+        if (e.key === 's' && (e.ctrlKey || e.metaKey)) {
+            if (document.getElementById('notesModal').classList.contains('active')) {
+                e.preventDefault();
+                saveNotes();
+            }
+        }
+    });
+}
+
+// Update word count for notes
+function updateWordCount() {
+    const textarea = document.getElementById('notesTextArea');
+    const text = textarea.value;
+    const charCount = text.length;
+    const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+    
+    document.getElementById('wordCount').textContent = wordCount;
+    document.getElementById('charCount').textContent = charCount;
+}
+
+// Open notes modal
+function openNotesModal() {
+    const modal = document.getElementById('notesModal');
+    const textarea = document.getElementById('notesTextArea');
+    
+    // Load existing notes
+    textarea.value = notes || '';
+    updateWordCount();
+    
+    // Update last saved info
+    updateLastSavedInfo();
+    
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    
+    // Focus on textarea
+    setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+    }, 200);
+}
+
+// Close notes modal
+function closeNotesModal() {
+    const modal = document.getElementById('notesModal');
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+// Save notes
+function saveNotes() {
+    const textarea = document.getElementById('notesTextArea');
+    notes = textarea.value;
+    notesLastSaved = new Date();
+    updateLastSavedInfo();
+    saveData();
+    closeNotesModal();
+}
+
+// Update last saved info
+function updateLastSavedInfo() {
+    const lastSavedSpan = document.getElementById('notesLastSaved');
+    if (notesLastSaved) {
+        const now = new Date();
+        const diffMs = now - notesLastSaved;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffSecs = Math.floor((diffMs % 60000) / 1000);
+        
+        if (diffMins > 0) {
+            lastSavedSpan.textContent = `${diffMins}m ${diffSecs}s ago`;
+        } else {
+            lastSavedSpan.textContent = `${diffSecs}s ago`;
+        }
+    } else {
+        lastSavedSpan.textContent = 'Never';
+    }
 }
 
 // Setup autocomplete for inputs
@@ -216,8 +318,6 @@ function addNewRow() {
             newRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     }, 200);
-    
-    // DO NOT auto-open form - user will click to edit
 }
 
 // Render a single row (compact view)
@@ -594,7 +694,7 @@ function renumberRows() {
 
 // Clear history
 function clearHistory() {
-    if (confirm('Clear all history?')) {
+    if (confirm('Clear all history and notes?')) {
         // Clear all timers
         Object.keys(pausedTimers).forEach(key => {
             clearInterval(pausedTimers[key]);
@@ -604,41 +704,60 @@ function clearHistory() {
         rows = [];
         rowCounter = 0;
         document.getElementById('tableBody').innerHTML = '';
+        
+        // Clear notes as well
+        notes = '';
+        notesLastSaved = null;
+        
         saveData();
     }
 }
 
 // Export CSV
 function exportCSV() {
-    if (rows.length === 0) {
+    let csvContent = '';
+    
+    // Add notes as a separate sheet (section)
+    if (notes && notes.trim()) {
+        csvContent += '=== NOTES ===\n';
+        csvContent += `"${notes.replace(/"/g, '""')}"\n\n`;
+    }
+    
+    // Add journal data
+    if (rows.length === 0 && !notes.trim()) {
         alert('No data to export');
         return;
     }
     
-    const headers = ['No.', 'Section', 'Product', 'SKU', 'Process', 'Oprt', 'MTE', 'Work Unit', 'Start Time', 'End Time', 'Paused Time', 'Remarks'];
-    const csvRows = [];
-    csvRows.push(headers.join(','));
+    if (rows.length > 0) {
+        if (csvContent) {
+            csvContent += '=== JOURNAL DATA ===\n';
+        }
+        
+        const headers = ['No.', 'Section', 'Product', 'SKU', 'Process', 'Oprt', 'MTE', 'Work Unit', 'Start Time', 'End Time', 'Paused Time', 'Remarks'];
+        csvContent += headers.join(',') + '\n';
+        
+        rows.forEach(row => {
+            const rowData = [
+                row.id,
+                `"${(row.section || '').replace(/"/g, '""')}"`,
+                `"${(row.product || '').replace(/"/g, '""')}"`,
+                `"${(row.sku || '').replace(/"/g, '""')}"`,
+                `"${(row.process || '').replace(/"/g, '""')}"`,
+                `"${(row.oprt || '').replace(/"/g, '""')}"`,
+                `"${(row.mte || '').replace(/"/g, '""')}"`,
+                `"${(row.workUnit || '').replace(/"/g, '""')}"`,
+                `"${row.startTime || ''}"`,
+                `"${row.endTime || ''}"`,
+                `"${formatPausedTime(row.pausedTime || 0)}"`,
+                `"${(row.remarks || '').replace(/"/g, '""')}"`
+            ];
+            csvContent += rowData.join(',') + '\n';
+        });
+    }
     
-    rows.forEach(row => {
-        const rowData = [
-            row.id,
-            `"${(row.section || '').replace(/"/g, '""')}"`,
-            `"${(row.product || '').replace(/"/g, '""')}"`,
-            `"${(row.sku || '').replace(/"/g, '""')}"`,
-            `"${(row.process || '').replace(/"/g, '""')}"`,
-            `"${(row.oprt || '').replace(/"/g, '""')}"`,
-            `"${(row.mte || '').replace(/"/g, '""')}"`,
-            `"${(row.workUnit || '').replace(/"/g, '""')}"`,
-            `"${row.startTime || ''}"`,
-            `"${row.endTime || ''}"`,
-            `"${formatPausedTime(row.pausedTime || 0)}"`,
-            `"${(row.remarks || '').replace(/"/g, '""')}"`
-        ];
-        csvRows.push(rowData.join(','));
-    });
-    
-    const csvString = csvRows.join('\n');
-    const blob = new Blob(['\uFEFF' + csvString], { type: 'text/csv;charset=utf-8;' });
+    // Create download
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
@@ -654,7 +773,9 @@ function saveData() {
     try {
         const dataToSave = {
             rows: rows,
-            rowCounter: rowCounter
+            rowCounter: rowCounter,
+            notes: notes,
+            notesLastSaved: notesLastSaved ? notesLastSaved.toISOString() : null
         };
         localStorage.setItem('journalData', JSON.stringify(dataToSave));
     } catch (e) {
@@ -670,6 +791,8 @@ function loadData() {
             const parsed = JSON.parse(savedData);
             rows = parsed.rows || [];
             rowCounter = parsed.rowCounter || 0;
+            notes = parsed.notes || '';
+            notesLastSaved = parsed.notesLastSaved ? new Date(parsed.notesLastSaved) : null;
             
             // Render all rows
             const tbody = document.getElementById('tableBody');
@@ -681,11 +804,16 @@ function loadData() {
                     startPauseTimer(row.id);
                 }
             });
+            
+            // Update notes last saved display if modal is open
+            updateLastSavedInfo();
         }
     } catch (e) {
         console.error('Error loading data:', e);
         rows = [];
         rowCounter = 0;
+        notes = '';
+        notesLastSaved = null;
     }
 }
 
