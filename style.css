@@ -742,3 +742,106 @@ body {
     background: #888;
     border-radius: 2px;
 }
+/* Notes Modal */
+.notes-modal {
+    max-width: 600px;
+    max-height: 95vh;
+}
+
+.notes-info {
+    padding: 8px 0 12px 0;
+    color: #666;
+    font-size: 0.85rem;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 12px;
+}
+
+.notes-info small {
+    font-weight: 400;
+}
+
+#notesTextArea {
+    width: 100%;
+    padding: 14px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    resize: vertical;
+    transition: border-color 0.3s;
+    min-height: 300px;
+    line-height: 1.8;
+    background: #fafafa;
+}
+
+#notesTextArea:focus {
+    outline: none;
+    border-color: #FF9800;
+    box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
+    background: white;
+}
+
+.notes-word-count {
+    padding: 10px 0 5px 0;
+    color: #888;
+    font-size: 0.8rem;
+    text-align: right;
+    border-top: 1px solid #eee;
+    margin-top: 12px;
+}
+
+.notes-word-count span {
+    font-weight: 600;
+    color: #555;
+}
+
+/* Notes button color */
+.btn-warning {
+    background: #FF9800;
+}
+
+.btn-warning:hover {
+    background: #F57C00;
+}
+
+.btn-warning:active {
+    background: #E65100;
+}
+
+/* Responsive notes */
+@media (max-width: 768px) {
+    .notes-modal {
+        max-width: 100%;
+        margin: 10px;
+    }
+    
+    #notesTextArea {
+        min-height: 250px;
+        font-size: 0.95rem;
+        padding: 12px;
+    }
+    
+    .notes-info {
+        font-size: 0.75rem;
+    }
+    
+    .notes-word-count {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 480px) {
+    #notesTextArea {
+        min-height: 200px;
+        font-size: 0.9rem;
+        padding: 10px;
+    }
+    
+    .notes-info {
+        font-size: 0.7rem;
+    }
+    
+    .notes-word-count {
+        font-size: 0.65rem;
+    }
+}
