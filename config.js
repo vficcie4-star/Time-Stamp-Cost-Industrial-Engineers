@@ -128,6 +128,7 @@ const CONFIG = {
         'ERSPH',
         'VFCNH',
         'VFCKH and VFSWH',
+        'Cooked Liver',
         'VFSAL',
         'WRCKH',
         'WRSWH',
