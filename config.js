@@ -12,8 +12,10 @@ const CONFIG = {
         'BST1',
         'FNC',
         'CNL',
-        'CL',
+        'DFL',
         'BST2',
+        'CL',
+
 
     ],
     
@@ -192,6 +194,7 @@ const CONFIG = {
         'BSCS',
         'BSHSC',
         'VFSPS',
+        'NYBPT'
 
     ],
 };
