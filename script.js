@@ -21,8 +21,7 @@ let dragState = {
     isLongPress: false,
     touchId: null,
     dragOffsetX: 0,
-    dragOffsetY: 0,
-    isDraggingFromTouch: false
+    dragOffsetY: 0
 };
 
 // Initialize app
@@ -36,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupDragAndDrop();
 });
 
-// Setup drag and drop
+// Setup drag and drop - entire row is draggable
 function setupDragAndDrop() {
     const tbody = document.getElementById('tableBody');
     
@@ -50,9 +49,6 @@ function setupDragAndDrop() {
     document.addEventListener('touchmove', onTouchMove, { passive: false });
     document.addEventListener('touchend', onTouchEnd, { passive: false });
     document.addEventListener('touchcancel', onTouchEnd, { passive: false });
-    
-    // Prevent default drag on images and links
-    document.addEventListener('dragstart', (e) => e.preventDefault());
 }
 
 // Touch start handler
@@ -60,14 +56,16 @@ function onTouchStart(e) {
     const touch = e.touches[0];
     const target = e.target.closest('tr');
     
+    // Ignore if clicking on buttons, inputs, or clickable elements
+    if (e.target.closest('button') || e.target.closest('.product-cell') || 
+        e.target.closest('.process-cell') || e.target.closest('.delete-btn') ||
+        e.target.closest('.btn-table') || e.target.closest('input')) {
+        return;
+    }
+    
     if (!target) return;
     if (target.id === 'tableFooter') return;
     if (target.closest('#tableFooter')) return;
-    
-    // Don't start drag if clicking on button or input
-    if (e.target.closest('button') || e.target.closest('input') || e.target.closest('textarea')) {
-        return;
-    }
     
     const rowId = parseInt(target.dataset.id);
     if (isNaN(rowId)) return;
@@ -82,17 +80,14 @@ function onTouchStart(e) {
     dragState.sourceRow = target;
     dragState.sourceId = rowId;
     dragState.isLongPress = false;
-    dragState.isDraggingFromTouch = true;
     
     // Start long press timer (500ms for mobile)
     clearTimeout(dragState.longPressTimer);
     dragState.longPressTimer = setTimeout(() => {
         if (dragState.sourceRow) {
             dragState.isLongPress = true;
-            // Add haptic feedback if available
-            if (navigator.vibrate) {
-                navigator.vibrate(50);
-            }
+            // Prevent default touch behavior
+            e.preventDefault();
             startDragging(dragState.sourceRow, dragState.sourceId, touch.clientX, touch.clientY);
         }
     }, 500);
@@ -144,26 +139,27 @@ function onTouchEnd(e) {
     dragState.startY = 0;
     dragState.isLongPress = false;
     dragState.touchId = null;
-    dragState.isDraggingFromTouch = false;
 }
 
 // Mouse down handler (desktop)
 function onDragStart(e) {
     const target = e.target.closest('tr');
     
+    // Ignore if clicking on buttons, inputs, or clickable elements
+    if (e.target.closest('button') || e.target.closest('.product-cell') || 
+        e.target.closest('.process-cell') || e.target.closest('.delete-btn') ||
+        e.target.closest('.btn-table') || e.target.closest('input')) {
+        return;
+    }
+    
     if (!target) return;
     if (target.id === 'tableFooter') return;
     if (target.closest('#tableFooter')) return;
     
-    // Don't start drag if clicking on button or input
-    if (e.target.closest('button') || e.target.closest('input') || e.target.closest('textarea')) {
-        return;
-    }
-    
     const rowId = parseInt(target.dataset.id);
     if (isNaN(rowId)) return;
     
-    // For desktop, start dragging immediately on mousedown
+    // For desktop, start dragging immediately on mousedown on row
     const rect = target.getBoundingClientRect();
     dragState.startX = e.clientX;
     dragState.startY = e.clientY;
@@ -172,7 +168,6 @@ function onDragStart(e) {
     dragState.sourceRow = target;
     dragState.sourceId = rowId;
     dragState.isLongPress = true;
-    dragState.isDraggingFromTouch = false;
     
     startDragging(target, rowId, e.clientX, e.clientY);
     e.preventDefault();
@@ -270,11 +265,10 @@ function startDragging(row, rowId, x, y) {
     clone.style.backgroundColor = 'white';
     clone.style.left = (x - dragState.dragOffsetX) + 'px';
     clone.style.top = (y - dragState.dragOffsetY) + 'px';
-    clone.style.width = rect.width + 'px';
     clone.id = 'drag-clone';
     
     // Remove interactions from clone
-    clone.querySelectorAll('button, .product-cell, .process-cell').forEach(el => {
+    clone.querySelectorAll('button, .drag-handle, .product-cell, .process-cell').forEach(el => {
         el.style.pointerEvents = 'none';
         if (el.onclick) {
             el.onclick = null;
@@ -686,6 +680,7 @@ function renderRow(data) {
     const tr = document.createElement('tr');
     tr.id = `row-${data.id}`;
     tr.dataset.id = data.id;
+    tr.setAttribute('draggable', 'false');
     
     // No.
     const tdNo = document.createElement('td');
@@ -700,7 +695,7 @@ function renderRow(data) {
     const tdProduct = document.createElement('td');
     const productDiv = document.createElement('div');
     productDiv.className = 'product-cell' + (data.product ? '' : ' empty');
-    productDiv.textContent = data.product || 'Tap to add';
+    productDiv.textContent = data.product || 'Tap';
     productDiv.onclick = (e) => {
         e.stopPropagation();
         openFormModal(data.id);
@@ -712,7 +707,7 @@ function renderRow(data) {
     const tdProcess = document.createElement('td');
     const processDiv = document.createElement('div');
     processDiv.className = 'process-cell' + (data.process ? '' : ' empty');
-    processDiv.textContent = data.process || 'Tap to add';
+    processDiv.textContent = data.process || 'Tap';
     processDiv.onclick = (e) => {
         e.stopPropagation();
         openFormModal(data.id);
@@ -724,7 +719,7 @@ function renderRow(data) {
     const tdStartTime = document.createElement('td');
     const startSpan = document.createElement('span');
     startSpan.className = 'time-display';
-    startSpan.textContent = data.startTime || '--:--:--';
+    startSpan.textContent = data.startTime || '--:--';
     startSpan.id = `startTime-${data.id}`;
     tdStartTime.appendChild(startSpan);
     tr.appendChild(tdStartTime);
@@ -741,7 +736,7 @@ function renderRow(data) {
     
     const endTimeDisplay = document.createElement('span');
     endTimeDisplay.className = 'time-display';
-    endTimeDisplay.textContent = data.endTime || '--:--:--';
+    endTimeDisplay.textContent = data.endTime || '--:--';
     endTimeDisplay.id = `endTimeDisplay-${data.id}`;
     endTimeContainer.appendChild(endTimeDisplay);
     
@@ -777,7 +772,7 @@ function renderRow(data) {
     const pausedDisplay = document.createElement('span');
     pausedDisplay.className = 'paused-display';
     pausedDisplay.id = `pausedDisplay-${data.id}`;
-    pausedDisplay.textContent = formatPausedTime(data.pausedTime || 0);
+    pausedDisplay.textContent = formatPausedTimeDisplay(data.pausedTime || 0);
     tdPaused.appendChild(pausedDisplay);
     tr.appendChild(tdPaused);
     
@@ -790,7 +785,7 @@ function renderRow(data) {
     const editBtn = document.createElement('button');
     editBtn.textContent = '✎';
     editBtn.className = 'btn-table btn-edit';
-    editBtn.title = 'Edit details';
+    editBtn.title = 'Edit';
     editBtn.onclick = (e) => {
         e.stopPropagation();
         openFormModal(data.id);
@@ -887,13 +882,13 @@ function updateRowDisplay(rowId) {
     
     const productDiv = cells[1]?.querySelector('.product-cell');
     if (productDiv) {
-        productDiv.textContent = row.product || 'Tap to add';
+        productDiv.textContent = row.product || 'Tap';
         productDiv.className = 'product-cell' + (row.product ? '' : ' empty');
     }
     
     const processDiv = cells[2]?.querySelector('.process-cell');
     if (processDiv) {
-        processDiv.textContent = row.process || 'Tap to add';
+        processDiv.textContent = row.process || 'Tap';
         processDiv.className = 'process-cell' + (row.process ? '' : ' empty');
     }
 }
@@ -937,7 +932,7 @@ function stopTimer(rowId) {
     
     const pausedDisplay = document.getElementById(`pausedDisplay-${rowId}`);
     if (pausedDisplay) {
-        pausedDisplay.textContent = formatPausedTime(row.pausedTime || 0);
+        pausedDisplay.textContent = formatPausedTimeDisplay(row.pausedTime || 0);
     }
     
     saveData();
@@ -994,18 +989,27 @@ function startPauseTimer(rowId) {
             const totalPaused = (row.pausedTime || 0) + elapsed;
             const display = document.getElementById(`pausedDisplay-${rowId}`);
             if (display) {
-                display.textContent = formatPausedTime(totalPaused);
+                display.textContent = formatPausedTimeDisplay(totalPaused);
             }
         }
     }, 1000);
 }
 
-// Format paused time
-function formatPausedTime(seconds) {
+// Format paused time for display (HH:MM:SS)
+function formatPausedTimeDisplay(seconds) {
     const hrs = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
     const secs = Math.floor(seconds % 60);
     return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+}
+
+// Format paused time for CSV (MM.SS or HMM.SS)
+function formatPausedTimeCSV(seconds) {
+    const totalMinutes = seconds / 60;
+    const mins = Math.floor(totalMinutes);
+    const secs = Math.floor(seconds % 60);
+    // Format: minutes.seconds (e.g., 5.49 for 5min 49sec, 70.30 for 1hr 10min 30sec)
+    return `${mins}.${String(secs).padStart(2, '0')}`;
 }
 
 // Delete row
@@ -1047,28 +1051,42 @@ function clearHistory() {
 
 // Export CSV
 function exportCSV() {
-    let csvContent = '';
+    let csvRows = [];
+    const today = new Date();
+    const dateStr = today.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
     
+    // Add NOTES section with each line as a separate row
     if (notes && notes.trim()) {
-        csvContent += '=== NOTES ===\n';
-        csvContent += `"${notes.replace(/"/g, '""')}"\n\n`;
+        csvRows.push(['=== NOTES ===']);
+        const noteLines = notes.split('\n');
+        noteLines.forEach(line => {
+            if (line.trim()) {
+                csvRows.push([`"${line.replace(/"/g, '""')}"`]);
+            } else {
+                csvRows.push(['']);
+            }
+        });
+        csvRows.push([]); // Empty row as separator
     }
     
-    if (rows.length === 0 && !notes.trim()) {
-        alert('No data to export');
-        return;
-    }
-    
+    // Add JOURNAL DATA section
     if (rows.length > 0) {
-        if (csvContent) {
-            csvContent += '=== JOURNAL DATA ===\n';
+        if (csvRows.length > 0) {
+            csvRows.push(['=== JOURNAL DATA ===']);
         }
         
-        const headers = ['No.', 'Section', 'Product', 'SKU', 'Process', 'Oprt', 'MTE', 'Work Unit', 'Start Time', 'End Time', 'Paused Time', 'Remarks'];
-        csvContent += headers.join(',') + '\n';
+        // Headers with Date
+        const headers = ['Date', 'No.', 'Section', 'Product', 'SKU', 'Process', 'Oprt', 'MTE', 'Work Unit', 'Start Time', 'End Time', 'Paused Time', 'Remarks'];
+        csvRows.push(headers);
         
+        // Data rows
         rows.forEach(row => {
             const rowData = [
+                dateStr,
                 row.id,
                 `"${(row.section || '').replace(/"/g, '""')}"`,
                 `"${(row.product || '').replace(/"/g, '""')}"`,
@@ -1079,18 +1097,27 @@ function exportCSV() {
                 `"${(row.workUnit || '').replace(/"/g, '""')}"`,
                 `"${row.startTime || ''}"`,
                 `"${row.endTime || ''}"`,
-                `"${formatPausedTime(row.pausedTime || 0)}"`,
+                `"${formatPausedTimeCSV(row.pausedTime || 0)}"`,
                 `"${(row.remarks || '').replace(/"/g, '""')}"`
             ];
-            csvContent += rowData.join(',') + '\n';
+            csvRows.push(rowData);
         });
     }
     
-    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    if (csvRows.length === 0) {
+        alert('No data to export');
+        return;
+    }
+    
+    // Convert to CSV string
+    const csvString = csvRows.map(row => row.join(',')).join('\n');
+    
+    // Create download
+    const blob = new Blob(['\uFEFF' + csvString], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', `journal_${new Date().toISOString().slice(0,10)}.csv`);
+    link.setAttribute('download', `journal_${today.toISOString().slice(0,10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
