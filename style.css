@@ -16,7 +16,7 @@ body {
     max-width: 100vw;
     padding: 8px;
     margin: 0 auto;
-    padding-bottom: 60px;
+    padding-bottom: 80px;
 }
 
 /* Header Styles */
@@ -25,7 +25,7 @@ body {
     color: white;
     padding: 12px;
     border-radius: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
@@ -37,14 +37,14 @@ body {
 }
 
 .current-time {
-    font-size: 2.2rem;
+    font-size: 2rem;
     font-weight: 700;
     letter-spacing: 2px;
     text-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .current-date {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 500;
     opacity: 0.9;
 }
@@ -60,10 +60,10 @@ body {
 .btn {
     flex: 1;
     min-width: 60px;
-    padding: 8px 6px;
+    padding: 8px 5px;
     border: none;
     border-radius: 6px;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -112,7 +112,7 @@ body {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.7rem;
-    min-width: 500px;
+    min-width: 480px;
 }
 
 #journalTable thead {
@@ -138,8 +138,9 @@ body {
 }
 
 #journalTable tbody tr {
-    transition: background 0.2s;
     cursor: grab;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    touch-action: none;
 }
 
 #journalTable tbody tr:active {
@@ -155,7 +156,7 @@ body {
     font-weight: 500;
     color: #1976D2;
     cursor: pointer;
-    padding: 3px 4px;
+    padding: 2px 4px;
     border-radius: 3px;
     transition: background 0.2s;
     max-width: 80px;
@@ -175,7 +176,7 @@ body {
 
 .process-cell {
     cursor: pointer;
-    padding: 3px 4px;
+    padding: 2px 4px;
     border-radius: 3px;
     transition: background 0.2s;
     max-width: 100px;
@@ -216,7 +217,7 @@ body {
 
 /* Buttons in table */
 .btn-table {
-    padding: 2px 5px;
+    padding: 2px 6px;
     border: none;
     border-radius: 3px;
     font-size: 0.5rem;
@@ -225,8 +226,8 @@ body {
     transition: all 0.2s;
     color: white;
     margin: 1px 0;
-    width: 100%;
     min-width: 30px;
+    white-space: nowrap;
 }
 
 .btn-table:active {
@@ -280,7 +281,7 @@ body {
     font-size: 0.55rem;
     text-align: center;
     background: #FFF3E0;
-    padding: 2px 4px;
+    padding: 1px 4px;
     border-radius: 3px;
     display: inline-block;
     min-width: 50px;
@@ -299,15 +300,75 @@ body {
     min-width: 30px;
 }
 
+/* Row dragging states */
+#tableBody tr.dragging {
+    opacity: 0.3;
+    transform: scale(0.98);
+}
+
+#tableBody tr.drag-over {
+    border-bottom: 2px solid #2196F3;
+    background: #e3f2fd;
+}
+
+#tableBody tr.drag-over-top {
+    border-top: 2px solid #2196F3;
+    background: #e3f2fd;
+}
+
+#tableBody tr.drag-source {
+    opacity: 0.2;
+}
+
+/* Drag clone */
+#drag-clone {
+    position: fixed !important;
+    pointer-events: none !important;
+    z-index: 10000 !important;
+    opacity: 0.9 !important;
+    transform: scale(1.02) rotate(-1deg) !important;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3) !important;
+    border-radius: 8px !important;
+    background: white !important;
+    width: auto !important;
+    min-width: 300px !important;
+}
+
+#drag-clone td {
+    padding: 6px 4px !important;
+}
+
+/* Drag indicator */
+.drag-indicator {
+    display: none;
+    position: fixed;
+    pointer-events: none;
+    font-size: 1.5rem;
+    color: #2196F3;
+    opacity: 0.6;
+    z-index: 999;
+    transform: translate(-50%, -50%);
+}
+
+.drag-indicator.active {
+    display: block;
+    animation: pulse 0.8s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+    50% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+}
+
 /* Add button at bottom */
 .add-bottom-btn {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     font-size: 0.85rem;
     font-weight: 700;
     background: linear-gradient(135deg, #2196F3, #1976D2);
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     color: white;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -327,102 +388,6 @@ body {
 #tableFooter td {
     padding: 8px !important;
     border-top: 2px solid #e0e0e0;
-}
-
-/* Drag and Drop Styles */
-#tableBody tr {
-    transition: transform 0.2s ease;
-    user-select: none;
-    -webkit-user-select: none;
-}
-
-#tableBody tr.dragging {
-    opacity: 0.4;
-    transform: scale(0.97);
-}
-
-#tableBody tr.drag-over {
-    border-bottom: 3px solid #2196F3;
-    background: #e3f2fd;
-}
-
-#tableBody tr.drag-over-top {
-    border-top: 3px solid #2196F3;
-    border-bottom: none;
-    background: #e3f2fd;
-}
-
-#tableBody tr.drag-source {
-    opacity: 0.3;
-}
-
-/* Drag indicator animation */
-.drag-indicator {
-    display: none;
-    position: fixed;
-    pointer-events: none;
-    font-size: 1.5rem;
-    color: #2196F3;
-    opacity: 0.7;
-    z-index: 999;
-    transform: translate(-50%, -50%);
-}
-
-.drag-indicator.active {
-    display: block;
-    animation: pulse 0.8s ease-in-out infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
-    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
-}
-
-/* Form Modal */
-.form-modal {
-    max-width: 450px;
-    max-height: 95vh;
-}
-
-.entry-form {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-}
-
-.form-group label {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #555;
-}
-
-.form-group input,
-.form-group textarea {
-    padding: 8px 10px;
-    border: 2px solid #e0e0e0;
-    border-radius: 6px;
-    font-size: 0.85rem;
-    font-family: inherit;
-    transition: border-color 0.3s;
-    width: 100%;
-}
-
-.form-group input:focus,
-.form-group textarea:focus {
-    outline: none;
-    border-color: #2196F3;
-    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
-}
-
-.form-group textarea {
-    resize: vertical;
-    min-height: 50px;
 }
 
 /* Modal Styles */
@@ -450,7 +415,7 @@ body {
     background: white;
     border-radius: 14px;
     width: 100%;
-    max-width: 450px;
+    max-width: 500px;
     max-height: 90vh;
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     animation: slideUp 0.3s ease-out;
@@ -459,7 +424,7 @@ body {
 }
 
 .modal-header {
-    padding: 16px 20px 12px;
+    padding: 14px 18px 12px;
     border-bottom: 1px solid #e0e0e0;
     display: flex;
     justify-content: space-between;
@@ -469,7 +434,7 @@ body {
 }
 
 .modal-header h3 {
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 600;
     color: #333;
     margin: 0;
@@ -481,9 +446,57 @@ body {
 }
 
 .modal-body {
-    padding: 16px 20px;
+    padding: 14px 18px;
     flex: 1;
     overflow-y: auto;
+}
+
+/* Form Modal */
+.form-modal {
+    max-width: 480px;
+    max-height: 95vh;
+}
+
+.entry-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    position: relative;
+}
+
+.form-group label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #555;
+}
+
+.form-group input,
+.form-group textarea {
+    padding: 6px 10px;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-family: inherit;
+    transition: border-color 0.3s;
+    width: 100%;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #2196F3;
+    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 50px;
 }
 
 /* Notes Modal */
@@ -503,7 +516,7 @@ body {
 #notesTextArea {
     width: 100%;
     padding: 12px;
-    border: 2px solid #e0e0e0;
+    border: 1.5px solid #e0e0e0;
     border-radius: 6px;
     font-size: 0.9rem;
     font-family: inherit;
@@ -530,41 +543,6 @@ body {
     margin-top: 10px;
 }
 
-/* Autocomplete Suggestions */
-.suggestions-list {
-    display: none;
-    position: relative;
-    background: white;
-    border: 1px solid #ddd;
-    border-top: none;
-    border-radius: 0 0 6px 6px;
-    max-height: 120px;
-    overflow-y: auto;
-    z-index: 100;
-    margin-top: -2px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.suggestions-list.active {
-    display: block;
-}
-
-.suggestion-item {
-    padding: 6px 10px;
-    cursor: pointer;
-    transition: background 0.2s;
-    font-size: 0.8rem;
-}
-
-.suggestion-item:hover {
-    background: #e3f2fd;
-}
-
-.suggestion-item .match-highlight {
-    font-weight: 700;
-    color: #1976D2;
-}
-
 /* Animations */
 @keyframes fadeIn {
     from { opacity: 0; }
@@ -582,31 +560,39 @@ body {
     }
 }
 
-/* Responsive Design */
+/* Responsive Design - Mobile First */
 @media (max-width: 768px) {
     .app-container {
         padding: 4px;
-        padding-bottom: 50px;
+        padding-bottom: 60px;
     }
 
     .current-time {
-        font-size: 1.8rem;
+        font-size: 1.6rem;
+    }
+
+    .current-date {
+        font-size: 0.75rem;
+    }
+
+    .action-buttons {
+        gap: 4px;
     }
 
     .btn {
-        font-size: 0.65rem;
+        font-size: 0.6rem;
         padding: 8px 4px;
         min-width: 50px;
     }
 
     #journalTable {
         font-size: 0.6rem;
-        min-width: 420px;
+        min-width: 400px;
     }
 
     #journalTable th {
-        font-size: 0.55rem;
-        padding: 5px 3px;
+        font-size: 0.5rem;
+        padding: 4px 3px;
     }
 
     #journalTable td {
@@ -615,114 +601,54 @@ body {
 
     .product-cell {
         max-width: 60px;
-        font-size: 0.6rem;
+        font-size: 0.55rem;
     }
 
     .process-cell {
         max-width: 70px;
-        font-size: 0.6rem;
+        font-size: 0.55rem;
     }
 
     .time-display {
-        font-size: 0.55rem;
-        min-width: 50px;
-        padding: 2px 3px;
+        font-size: 0.5rem;
+        min-width: 45px;
+        padding: 1px 3px;
     }
 
     .btn-table {
         font-size: 0.45rem;
         padding: 2px 4px;
-        min-width: 28px;
+        min-width: 25px;
     }
 
     .delete-btn {
         width: 18px;
         height: 18px;
-        font-size: 0.55rem;
+        font-size: 0.5rem;
     }
 
     .paused-display {
         font-size: 0.5rem;
-        min-width: 45px;
+        min-width: 40px;
+        padding: 1px 3px;
     }
 
     .modal-content {
         max-width: 100%;
-        margin: 10px;
+        margin: 8px;
+        max-height: 95vh;
     }
 
     .modal-header {
-        padding: 12px 16px 10px;
+        padding: 12px 14px 10px;
     }
 
     .modal-body {
-        padding: 12px 16px;
-    }
-
-    .form-group input,
-    .form-group textarea {
-        font-size: 0.85rem;
-        padding: 6px 8px;
-    }
-
-    .add-bottom-btn {
-        padding: 10px;
-        font-size: 0.75rem;
-    }
-
-    #notesTextArea {
-        min-height: 200px;
-        font-size: 0.85rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .current-time {
-        font-size: 1.5rem;
-    }
-
-    .btn {
-        font-size: 0.55rem;
-        padding: 6px 3px;
-        min-width: 40px;
-    }
-
-    #journalTable {
-        font-size: 0.55rem;
-        min-width: 360px;
-    }
-
-    #journalTable th {
-        font-size: 0.5rem;
-        padding: 4px 2px;
-    }
-
-    #journalTable td {
-        padding: 2px 2px;
-    }
-
-    .product-cell {
-        max-width: 45px;
-        font-size: 0.55rem;
-    }
-
-    .process-cell {
-        max-width: 55px;
-        font-size: 0.55rem;
-    }
-
-    .time-display {
-        font-size: 0.5rem;
-        min-width: 42px;
-    }
-
-    .paused-display {
-        font-size: 0.45rem;
-        min-width: 38px;
+        padding: 12px 14px;
     }
 
     .modal-header h3 {
-        font-size: 0.9rem;
+        font-size: 0.85rem;
     }
 
     .btn-sm {
@@ -733,13 +659,123 @@ body {
     .form-group input,
     .form-group textarea {
         font-size: 0.8rem;
-        padding: 5px 6px;
+        padding: 5px 8px;
+    }
+
+    .form-group label {
+        font-size: 0.65rem;
+    }
+
+    .add-bottom-btn {
+        padding: 10px;
+        font-size: 0.75rem;
+    }
+
+    .action-cell {
+        gap: 1px;
+    }
+
+    #drag-clone {
+        min-width: 200px !important;
+    }
+    
+    #drag-clone td {
+        padding: 3px 3px !important;
+        font-size: 0.5rem !important;
+    }
+
+    #notesTextArea {
+        min-height: 180px;
+        font-size: 0.85rem;
+        padding: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .current-time {
+        font-size: 1.4rem;
+    }
+
+    .btn {
+        font-size: 0.55rem;
+        padding: 6px 3px;
+        min-width: 40px;
+    }
+
+    #journalTable {
+        font-size: 0.5rem;
+        min-width: 340px;
+    }
+
+    #journalTable th {
+        font-size: 0.45rem;
+        padding: 3px 2px;
+    }
+
+    #journalTable td {
+        padding: 2px 2px;
+    }
+
+    .product-cell {
+        max-width: 45px;
+        font-size: 0.5rem;
+    }
+
+    .process-cell {
+        max-width: 55px;
+        font-size: 0.5rem;
+    }
+
+    .time-display {
+        font-size: 0.45rem;
+        min-width: 38px;
+        padding: 1px 2px;
+    }
+
+    .btn-table {
+        font-size: 0.4rem;
+        padding: 1px 3px;
+        min-width: 20px;
+    }
+
+    .delete-btn {
+        width: 16px;
+        height: 16px;
+        font-size: 0.45rem;
+    }
+
+    .paused-display {
+        font-size: 0.45rem;
+        min-width: 35px;
+    }
+
+    .modal-header {
+        padding: 10px 12px 8px;
+    }
+
+    .modal-body {
+        padding: 10px 12px;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        font-size: 0.75rem;
+        padding: 4px 6px;
+    }
+
+    .add-bottom-btn {
+        padding: 8px;
+        font-size: 0.65rem;
     }
 
     #notesTextArea {
         min-height: 150px;
         font-size: 0.8rem;
-        padding: 10px;
+        padding: 8px;
+    }
+
+    #drag-clone {
+        min-width: 150px !important;
     }
 }
 
@@ -758,18 +794,8 @@ body {
     border-radius: 2px;
 }
 
-.suggestions-list::-webkit-scrollbar {
-    width: 4px;
-}
-
-.suggestions-list::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 2px;
-}
-
-.suggestions-list::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 2px;
+.table-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }
 
 .modal-body::-webkit-scrollbar {
@@ -784,4 +810,63 @@ body {
 .modal-body::-webkit-scrollbar-thumb {
     background: #888;
     border-radius: 2px;
+}
+
+/* Suggestions */
+.suggestions-list {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    max-height: 120px;
+    overflow-y: auto;
+    z-index: 100;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.suggestions-list.active {
+    display: block;
+}
+
+.suggestion-item {
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 0.8rem;
+}
+
+.suggestion-item:hover {
+    background: #e3f2fd;
+}
+
+.suggestion-item:active {
+    background: #bbdefb;
+}
+
+.suggestion-item.highlighted {
+    background: #e3f2fd;
+}
+
+.suggestion-item .match-highlight {
+    font-weight: 700;
+    color: #1976D2;
+}
+
+@media (max-width: 768px) {
+    .suggestion-item {
+        padding: 8px 10px;
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .suggestion-item {
+        padding: 10px 10px;
+        font-size: 0.7rem;
+    }
 }
